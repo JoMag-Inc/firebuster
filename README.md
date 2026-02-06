@@ -59,5 +59,14 @@ To run the scripts do:
 uv run python scriptname.py
 ```
 
-## FAST API coming soon
+## Tests
 
+The tests are located in `tests/`. To run the tests one can use the `run_tests.sh` like this:
+
+```bash
+./run_tests.sh
+```
+
+It contains a command for locating all tests in the tests/ directory and runs them
+
+## FAST API coming soon
