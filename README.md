@@ -1,7 +1,7 @@
 # firebuster
 
-Firebuster is a REST API service that can claculate the ttf(time to flashover) given a certain location.
-It is currently under construction
+Firebuster is a REST API service that can calculate the TTF (time to flashover) for a given location.
+It is currently under construction.
 
 ## Install requirements
 
