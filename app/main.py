@@ -4,7 +4,7 @@ app = FastAPI(title="Firebuster API")
 
 @app.get("/api/health")
 def get_health():
-    return {"Status": "ok"}
+    return {"status": "ok"}
 
 
 # Added example path parameter handlers from FastAPI documentation https://fastapi.tiangolo.com/tutorial/path-params/
