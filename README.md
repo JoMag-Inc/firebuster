@@ -80,11 +80,11 @@ The entry of the application is placed in `app/main.py` and can be run with the 
 # To run in dev mode with auto-reload
 uv run fastapi dev app/main.py
 
-# While run mode is used for prod environtments
+# While run mode is used for prod environments
 uv run fastapi run app/main.py
 ```
 
-To spare your fingers we have set up a make file for running them with:
+To spare your fingers we have set up a Makefile for running them with:
 
 ```bash
 make dev
@@ -92,7 +92,7 @@ make dev
 make prod
 ```
 
-While the server is running it can be tested using your favorite tools. Here is a cUrl command to get started:
+While the server is running it can be tested using your favorite tools. Here is a curl command to get started:
 
 ```bash
 curl http://127.0.0.1:8000/api/health
