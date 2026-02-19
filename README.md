@@ -61,10 +61,10 @@ uv run python scriptname.py
 
 ## Tests
 
-The tests are located in `tests/`. To run the tests one can use the `run_tests.sh` like this:
+The tests are located in `tests/`. To run the tests one can use the `make test` command like this:
 
 ```bash
-./run_tests.sh
+make test
 ```
 
 It contains a command for locating all tests in the tests/ directory and runs them
