@@ -5,3 +5,6 @@ dev:
 
 prod:
 	uv run fastapi run app/main.py
+
+test:
+	uv run python -m unittest discover -s tests
