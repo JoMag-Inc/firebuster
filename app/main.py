@@ -13,7 +13,7 @@ def get_health():
 async def read_item(item_id):
     return {"item_id": item_id}
 
-@app.get("/itemstypes/{item_id}")
+@app.get("/items-types/{item_id}")
 async def read_item_types(item_id: int):
     return {"item_id": item_id}
 
