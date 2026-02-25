@@ -1,9 +1,8 @@
+import csv
 from dataclasses import dataclass
-from typing import List
+from io import StringIO
 
 from frcm import WeatherData, WeatherDataPoint, compute
-import csv
-from io import StringIO
 
 
 @dataclass(frozen=True)
@@ -33,7 +32,7 @@ class TTFCalculator:
         )
     
     @staticmethod
-    def calculate_from_points(data_points: List[WeatherDataPoint]) -> List[TTFResult]:
+    def calculate_from_points(data_points: list[WeatherDataPoint]) -> list[TTFResult]:
         """
         Calculate TTF from a list of WeatherDataPoint objects
         Args:
@@ -55,7 +54,7 @@ class TTFCalculator:
         ]
     
     @staticmethod
-    def calculate_from_csv(csv_content: str) -> List[TTFResult]:
+    def calculate_from_csv(csv_content: str) -> list[TTFResult]:
         """
         Calculate TTF from CSV data
         Expected columns: timestamp, temperature, humidity, wind_speed
