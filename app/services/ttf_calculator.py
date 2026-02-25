@@ -6,6 +6,40 @@ class TTFCalculator:
     """Calculates TTF from weather data using dynamic-frcm-simple"""
     
     @staticmethod
+    def create_weather_point(timestamp: str, temperature: float, humidity: float, wind_speed: float) -> WeatherDataPoint:
+        """
+        Create a single WeatherDataPoint
+        Args:
+            timestamp: Data point timestamp
+            temperature: Temperature value
+            humidity: Humidity value
+            wind_speed: Wind speed value
+        Returns: WeatherDataPoint object
+        """
+        return WeatherDataPoint(
+            timestamp=timestamp,
+            temperature=temperature,
+            humidity=humidity,
+            wind_speed=wind_speed
+        )
+    
+    @staticmethod
+    def calculate_from_points(data_points: list):
+        """
+        Calculate TTF from a list of WeatherDataPoint objects
+        Args:
+            data_points: List of WeatherDataPoint objects (minimum 2 points required)
+        Returns: FireRisk object with TTF results
+        Note: The frcm library requires at least 2 data points for gap detection
+        """
+        if len(data_points) < 2:
+            raise ValueError("At least 2 data points are required for TTF calculation")
+        
+        weather_data = WeatherData(data=data_points)
+        results = compute(weather_data)
+        return results
+    
+    @staticmethod
     def calculate_from_csv(csv_content: str):
         """
         Calculate TTF from CSV data
@@ -16,7 +50,7 @@ class TTFCalculator:
         reader = csv.DictReader(StringIO(csv_content))
         
         for row in reader:
-            point = WeatherDataPoint(
+            point = TTFCalculator.create_weather_point(
                 timestamp=row['timestamp'],
                 temperature=float(row['temperature']),
                 humidity=float(row['humidity']),
@@ -24,6 +58,4 @@ class TTFCalculator:
             )
             data_points.append(point)
         
-        weather_data = WeatherData(data=data_points)
-        results = compute(weather_data)
-        return results
+        return TTFCalculator.calculate_from_points(data_points)
