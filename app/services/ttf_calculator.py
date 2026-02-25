@@ -1,6 +1,15 @@
+from dataclasses import dataclass
+from typing import List
+
 from frcm import WeatherData, WeatherDataPoint, compute
 import csv
 from io import StringIO
+
+
+@dataclass(frozen=True)
+class TTFResult:
+    weather_point: WeatherDataPoint
+    ttf: float
 
 class TTFCalculator:
     """Calculates TTF from weather data using dynamic-frcm-simple"""
@@ -24,12 +33,12 @@ class TTFCalculator:
         )
     
     @staticmethod
-    def calculate_from_points(data_points: list):
+    def calculate_from_points(data_points: List[WeatherDataPoint]) -> List[TTFResult]:
         """
         Calculate TTF from a list of WeatherDataPoint objects
         Args:
             data_points: List of WeatherDataPoint objects (minimum 2 points required)
-        Returns: FireRisk object with TTF results
+        Returns: List of TTFResult objects with weather context
         Note: The frcm library requires at least 2 data points for gap detection
         """
         if len(data_points) < 2:
@@ -37,14 +46,20 @@ class TTFCalculator:
         
         weather_data = WeatherData(data=data_points)
         results = compute(weather_data)
-        return results
+
+        ttf_values = [risk.ttf for risk in results.firerisks]
+        count = min(len(data_points), len(ttf_values))
+        return [
+            TTFResult(weather_point=data_points[index], ttf=float(ttf_values[index]))
+            for index in range(count)
+        ]
     
     @staticmethod
-    def calculate_from_csv(csv_content: str):
+    def calculate_from_csv(csv_content: str) -> List[TTFResult]:
         """
         Calculate TTF from CSV data
         Expected columns: timestamp, temperature, humidity, wind_speed
-        Returns: FireRisk object with TTF results
+        Returns: List of TTFResult objects with weather context
         """
         data_points = []
         reader = csv.DictReader(StringIO(csv_content))

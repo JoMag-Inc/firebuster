@@ -1,5 +1,7 @@
 import unittest
-from app.services.ttf_calculator import TTFCalculator
+
+from app.services.ttf_calculator import TTFCalculator, TTFResult
+from frcm import WeatherDataPoint
 
 class TestTTFCalculator(unittest.TestCase):
     def test_create_weather_point(self):
@@ -24,12 +26,15 @@ class TestTTFCalculator(unittest.TestCase):
         ]
         
         results = TTFCalculator.calculate_from_points(points)
-        print(f"\nResults from points: {results}")
-        for risk in results.firerisks:
-            print(f"  {risk.timestamp}: TTF = {risk.ttf}")
         
         self.assertIsNotNone(results)
-        self.assertEqual(len(results.firerisks), 2)
+        self.assertEqual(len(results), 2)
+        self.assertIsInstance(results[0], TTFResult)
+        self.assertIsInstance(results[0].weather_point, WeatherDataPoint)
+        self.assertEqual(results[0].weather_point.temperature, 10.5)
+        self.assertEqual(results[0].weather_point.humidity, 65)
+        self.assertEqual(results[0].weather_point.wind_speed, 5.2)
+        self.assertIsInstance(results[0].ttf, float)
     
     def test_calculate_from_csv(self):
         """Test TTF calculation from CSV data"""
@@ -38,12 +43,15 @@ class TestTTFCalculator(unittest.TestCase):
 2026-01-07T01:00:00+00:00,11.0,63,5.5"""
         
         results = TTFCalculator.calculate_from_csv(csv_data)
-        print(f"\nResults: {results}")
-        for risk in results.firerisks:
-            print(f"  {risk.timestamp}: TTF = {risk.ttf}")
         
         self.assertIsNotNone(results)
-        self.assertGreater(len(results.firerisks), 0)
+        self.assertGreater(len(results), 0)
+        self.assertIsInstance(results[0], TTFResult)
+        self.assertIsInstance(results[0].weather_point, WeatherDataPoint)
+        self.assertEqual(results[0].weather_point.temperature, 10.5)
+        self.assertEqual(results[0].weather_point.humidity, 65)
+        self.assertEqual(results[0].weather_point.wind_speed, 5.2)
+        self.assertIsInstance(results[0].ttf, float)
 
 if __name__ == '__main__':
     unittest.main()
