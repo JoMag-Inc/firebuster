@@ -1,7 +1,6 @@
 from frcm import WeatherData, WeatherDataPoint, compute
 import csv
 from io import StringIO
-from datetime import datetime
 
 class TTFCalculator:
     """Calculates TTF from weather data using dynamic-frcm-simple"""
