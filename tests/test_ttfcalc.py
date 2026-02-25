@@ -52,6 +52,50 @@ class TestTTFCalculator(unittest.TestCase):
         self.assertEqual(results[0].weather_point.humidity, 65)
         self.assertEqual(results[0].weather_point.wind_speed, 5.2)
         self.assertIsInstance(results[0].ttf, float)
+    
+    def test_empty_csv(self):
+        """Test that empty CSV raises a descriptive error"""
+        with self.assertRaises(ValueError) as context:
+            TTFCalculator.calculate_from_csv("")
+        self.assertIn("empty", str(context.exception).lower())
+    
+    def test_csv_missing_columns(self):
+        """Test that CSV with missing required columns raises an error"""
+        csv_data = """timestamp,temperature
+2026-01-07T00:00:00+00:00,10.5"""
+        
+        with self.assertRaises(ValueError) as context:
+            TTFCalculator.calculate_from_csv(csv_data)
+        self.assertIn("missing", str(context.exception).lower())
+        self.assertIn("humidity", str(context.exception).lower())
+    
+    def test_csv_invalid_numeric_value(self):
+        """Test that invalid numeric values raise a descriptive error"""
+        csv_data = """timestamp,temperature,humidity,wind_speed
+2026-01-07T00:00:00+00:00,not_a_number,65,5.2
+2026-01-07T01:00:00+00:00,11.0,63,5.5"""
+        
+        with self.assertRaises(ValueError) as context:
+            TTFCalculator.calculate_from_csv(csv_data)
+        self.assertIn("invalid", str(context.exception).lower())
+        self.assertIn("row", str(context.exception).lower())
+    
+    def test_csv_only_header(self):
+        """Test that CSV with only header raises an error"""
+        csv_data = """timestamp,temperature,humidity,wind_speed"""
+        
+        with self.assertRaises(ValueError) as context:
+            TTFCalculator.calculate_from_csv(csv_data)
+        self.assertIn("no data", str(context.exception).lower())
+    
+    def test_csv_single_row(self):
+        """Test that CSV with only one data row raises an error"""
+        csv_data = """timestamp,temperature,humidity,wind_speed
+2026-01-07T00:00:00+00:00,10.5,65,5.2"""
+        
+        with self.assertRaises(ValueError) as context:
+            TTFCalculator.calculate_from_csv(csv_data)
+        self.assertIn("2 data points", str(context.exception).lower())
 
 if __name__ == '__main__':
     unittest.main()
