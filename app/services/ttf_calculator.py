@@ -30,7 +30,6 @@ class TTFCalculator:
             humidity=humidity,
             wind_speed=wind_speed
         )
-    
     @staticmethod
     def calculate_from_points(data_points: list[WeatherDataPoint]) -> list[TTFResult]:
         """
@@ -48,10 +47,12 @@ class TTFCalculator:
 
         ttf_values = [risk.ttf for risk in results.firerisks]
         count = min(len(data_points), len(ttf_values))
-        return [
-            TTFResult(weather_point=data_points[index], ttf=float(ttf_values[index]))
-            for index in range(count)
-        ]
+
+        ttf_results = []
+        for index in range(count):
+            ttf_results.append(TTFResult(weather_point=data_points[index], ttf=float(ttf_values[index])))
+
+        return ttf_results
     
     @staticmethod
     def calculate_from_csv(csv_content: str) -> list[TTFResult]:
@@ -93,4 +94,6 @@ class TTFCalculator:
         if not data_points:
             raise ValueError("CSV contains no data rows")
         
-        return TTFCalculator.calculate_from_points(data_points)
+        calculated_ttf = TTFCalculator.calculate_from_points(data_points)
+
+        return calculated_ttf
