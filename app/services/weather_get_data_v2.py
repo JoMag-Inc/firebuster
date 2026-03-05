@@ -34,7 +34,7 @@ def process_weather_data(raw_data):
     }
 
     df_filtered = df[column_map.keys()].rename(columns=column_map)
-    df_filtered.to_csv('weather_data.csv', index=False)
+    #df_filtered.to_csv('weather_data.csv', index=False)
     
     return df_filtered
 
