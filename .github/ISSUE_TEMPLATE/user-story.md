@@ -1,9 +1,9 @@
 ---
 name: User Story
-about: A user-centered requirement describing a specific need
+about: A user-centered requirement with implementation details
 title: "US: "
 labels: user-story
-assignees: ''
+assignees: ""
 ---
 
 ## User Story
@@ -18,6 +18,42 @@ assignees: ''
 - [ ] Criterion 2
 - [ ] Criterion 3
 
+## Features
+
+<!-- Break the story into specific features or capabilities needed to fulfill it. -->
+
+### Feature 1: [Name]
+
+**Description:**
+
+<!-- What specific capability or behavior does this feature deliver? -->
+
+**Technical Approach:**
+
+<!-- How should this be implemented? Key components, APIs, or patterns involved. -->
+
+**Tasks:**
+
+- [ ] Task 1
+- [ ] Task 2
+
+---
+
+### Feature 2: [Name]
+
+**Description:**
+
+**Technical Approach:**
+
+**Tasks:**
+
+- [ ] Task 1
+- [ ] Task 2
+
+---
+
+<!-- Copy the feature block above for additional features as needed. -->
+
 ## Additional Context
 
-<!-- Optional: Add any additional context, screenshots, or mockups here -->
+<!-- Optional: Add any additional context, screenshots, mockups, or dependencies here. -->
