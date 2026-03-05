@@ -18,6 +18,7 @@ response = requests.get(url, params=params, headers=headers)
 #raw data goes here
 data = response.json()
 
+print(data)
 ########################
 #INFORMATION ABOUT DATA#
 ########################
