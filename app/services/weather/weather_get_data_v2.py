@@ -6,11 +6,14 @@ import weather_static
 headers = weather_static.met_required_headers
 url = weather_static.met_base_url
 params = weather_static.met_example_coordinates
-response = requests.get(url, params=params, headers=headers)
 
-#raw data
-data = response.json()
+#raw data from met
+def get_weather_data():
+    response = requests.get(url, params=params, headers=headers)
+    raw_data = response.json()
+    return raw_data
 
+#convert to CSV
 def process_weather_data(raw_data):
    
     # Flatten the timeseries list
@@ -28,7 +31,6 @@ def process_weather_data(raw_data):
     df_filtered = df[column_map.keys()].rename(columns=column_map)
     #df_filtered.to_csv('weather_data.csv', index=False) #write to file
     
-    #csv formatted weather data
     return df_filtered
 
-print(process_weather_data(data))
+print(process_weather_data(get_weather_data()))
