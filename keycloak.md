@@ -15,17 +15,21 @@ Keycloak can be started in multiple ways: [Keycloak Getting Started guides](http
 docker compose up -d
 ```
 
-Point your url to: http://localhost:8080 and log in as the `admin` user to access the Keycloak Administration Console. This needs a username and a password.
+Point your url to: http://localhost:8080 and log in to access the Keycloak Administration Console using the `KC_BOOTSTRAP_ADMIN_USERNAME` and `KC_BOOTSTRAP_ADMIN_PASSWORD` values from your `.env` file.
 
 ## .ENV credentials
 
-to be able to commuinicate with the keycloak server we need to define some .env variables: client_id, realm, server_url
-If you have no, set up a .env file in root. It should
+Create a `.env` file in the project root with the following variables:
 
 ```env
-client_id=
-realm=
-server_url=
+# FastAPI app
+client_id=url
+realm=realmname
+server_url=http://localhost:8080
+
+# Keycloak bootstrap admin (used by docker compose)
+KC_BOOTSTRAP_ADMIN_USERNAME=admin
+KC_BOOTSTRAP_ADMIN_PASSWORD=
 ```
 
 ## RestAPI Endpoints
@@ -56,7 +60,7 @@ To obtain the auth JWT bearer token, use curl as below (Linux/Mac) or other rele
 export token=$(\
 curl -X POST http://localhost:8080/realms/Firebuster/protocol/openid-connect/token \
 -d 'client_id=firebuster-api' \
--d 'username=user1&password=user1&grant_type=password'| jq --raw-output '.access_token' \
+-d 'username=fireadmin&password=secret&grant_type=password'| jq --raw-output '.access_token' \
 )
 ```
 
@@ -64,7 +68,7 @@ curl -X POST http://localhost:8080/realms/Firebuster/protocol/openid-connect/tok
 You can use the same command to obtain tokens on behalf of other users, by changing the `username` and `password` request parameters.
 
 After running the command above, you can now access the `http://localhost:8000/api/v1/admin` endpoint
-for the user `user1` with the `ADMIN` role (realm) as follows:
+for the user `fireadmin` with the `ADMIN` role (realm) as follows:
 
 ```shell
 curl http://localhost:8000/api/v1/admin -H "Authorization: Bearer "$token
