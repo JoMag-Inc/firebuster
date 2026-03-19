@@ -1,21 +1,21 @@
 from decouple import config
 from keycloak import KeycloakOpenID
 from fastapi import HTTPException, status, Depends, Request
-
+from fastapi.security import OpenIdConnect
 from app.kc.models import User
 
 keycloak_openid = KeycloakOpenID(
     server_url=config("server_url"), realm_name=config("realm"), client_id=""
 )
-
-
 # Get Token from HTTP Request object of the restapi endpoint
-def get_jwttoken(req: Request):
-    token = req.headers["Authorization"]
-    token = token.split(" ").pop(1)
-    print(token)
-    return token
+oidc_scheme = OpenIdConnect(
+    openIdConnectUrl=f"{config('server_url')}/realms/{config('realm')}/.well-known/openid-configuration"
+)
 
+def get_jwttoken(token: str = Depends(oidc_scheme)):
+    if token.startswith("Bearer "):
+        token = token[7:]
+    return token
 
 # Decode Token
 async def get_payload(token=Depends(get_jwttoken)) -> dict:

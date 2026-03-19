@@ -103,3 +103,7 @@ You can also use the built in `/docs` route in FastAPI:
 ```bash
 http://127.0.0.1:8000/docs
 ```
+
+## Key cloak
+
+Authentication to the rest api is managed using Key Cloak. We run it in a dockercontainer, and it will connect to a postgres database for storing users

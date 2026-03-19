@@ -1,8 +1,15 @@
+from decouple import config
 from fastapi import FastAPI, Depends, status
 from app.kc.auth import verify_admin_role, verify_user_role, verify_sadmin_role, verify_suser_role, verify_user_path, \
     verify_user_locquery
 
-app = FastAPI()
+app = FastAPI(
+    swagger_ui_parameters={"syntaxHighlight": False},
+    swagger_ui_init_oauth={
+        "clientId": config("client_id"),
+        "usePkceWithAuthorizationCodeGrant": True,
+    },
+)
 
 
 @app.get('/api/v1/admin')
