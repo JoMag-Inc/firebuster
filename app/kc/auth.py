@@ -2,7 +2,7 @@ from decouple import config
 from keycloak import KeycloakOpenID
 from fastapi import HTTPException, status, Depends, Request
 
-from kc.models import User
+from app.kc.models import User
 
 keycloak_openid = KeycloakOpenID(
     server_url=config("server_url"), realm_name=config("realm"), client_id=""
@@ -15,7 +15,6 @@ def get_jwttoken(req: Request):
     token = token.split(" ").pop(1)
     print(token)
     return token
-
 
 
 # Decode Token

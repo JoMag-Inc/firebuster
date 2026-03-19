@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Depends, status
-from kc.auth import verify_admin_role, verify_user_role, verify_sadmin_role, verify_suser_role, verify_user_path, \
+from app.kc.auth import verify_admin_role, verify_user_role, verify_sadmin_role, verify_suser_role, verify_user_path, \
     verify_user_locquery
 
 app = FastAPI()
