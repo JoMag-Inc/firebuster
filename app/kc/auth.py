@@ -1,24 +1,21 @@
-from functools import lru_cache
 from decouple import config
 from keycloak import KeycloakOpenID
 from fastapi import HTTPException, status, Depends, Request
 from fastapi.security import OpenIdConnect
 from app.kc.models import User
 
-@lru_cache
-def _keycloak_openid():
+def keycloak_openid():
     return KeycloakOpenID(
         server_url=config("server_url"), realm_name=config("realm"), client_id=""
     )
 
-@lru_cache
-def _oidc_scheme():
+def oidc_scheme():
     return OpenIdConnect(
         openIdConnectUrl=f"{config('server_url')}/realms/{config('realm')}/.well-known/openid-configuration"
     )
 
 async def get_jwttoken(request: Request) -> str:
-    token = await _oidc_scheme()(request)
+    token = await oidc_scheme()(request)
     if token and token.startswith("Bearer "):
         token = token[7:]
     return token
@@ -26,7 +23,7 @@ async def get_jwttoken(request: Request) -> str:
 # Decode Token
 async def get_payload(token: str = Depends(get_jwttoken)) -> dict:
     try:
-        return _keycloak_openid().decode_token(token)
+        return keycloak_openid().decode_token(token)
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
