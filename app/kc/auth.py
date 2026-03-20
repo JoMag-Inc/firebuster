@@ -69,7 +69,7 @@ def verify_sadmin_role(user: User = Depends(get_user_info)) -> bool:
 def verify_user_role(user: User = Depends(get_user_info)) -> bool:
     roles: list = user.realm_roles
     roles.extend(user.client_roles)
-    return verify_role(roles, "APP_USER")
+    return verify_role(roles, "USER")
 
 
 def verify_suser_role(user: User = Depends(get_user_info)) -> bool:
