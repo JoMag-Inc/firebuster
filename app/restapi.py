@@ -11,6 +11,9 @@ app = FastAPI(
     },
 )
 
+@app.get('/api/health', status_code=status.HTTP_200_OK)
+def get_health():
+    return {"status": "ok"}
 
 @app.get('/api/v1/admin')
 def protected_admin(admin: bool = Depends(verify_admin_role)):
