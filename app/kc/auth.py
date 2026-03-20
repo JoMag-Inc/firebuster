@@ -1,7 +1,7 @@
 from decouple import config
 from keycloak import KeycloakOpenID
 from fastapi import HTTPException, status, Depends, Request
-from fastapi.security import OpenIdConnect
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from app.kc.models import User
 
 def keycloak_openid():
@@ -9,17 +9,11 @@ def keycloak_openid():
         server_url=config("server_url"), realm_name=config("realm"), client_id=""
     )
 
-def oidc_scheme():
-    return OpenIdConnect(
-        openIdConnectUrl=f"{config('server_url')}/realms/{config('realm')}/.well-known/openid-configuration"
-    )
 
-async def get_jwttoken(request: Request) -> str:
-    token = await oidc_scheme()(request)
-    if token and token.startswith("Bearer "):
-        token = token[7:]
-    return token
+bearer = HTTPBearer()
 
+async def get_jwttoken(credentials: HTTPAuthorizationCredentials = Depends(bearer)) -> str:
+      return credentials.credentials
 # Decode Token
 async def get_payload(token: str = Depends(get_jwttoken)) -> dict:
     try:
@@ -58,14 +52,12 @@ async def get_user_info(payload: dict = Depends(get_payload)) -> User:
 def verify_admin_role(user: User = Depends(get_user_info)) -> bool:
     roles: list = user.realm_roles
     roles.extend(user.client_roles)
-    print(roles)
     return verify_role(roles, "ADMIN")
 
 
 def verify_sadmin_role(user: User = Depends(get_user_info)) -> bool:
     roles: list = user.realm_roles
     roles.extend(user.client_roles)
-    print(roles)
     return verify_role(roles, "APP_ADMIN")
 
 
@@ -95,20 +87,15 @@ def verify_role(roles: list, role: str) -> bool:
 
 def verify_user_path(req: Request, user: User = Depends(get_user_info)):
     rpath: str = req.url.path
-    print(rpath)
     paths: list = user.locations
-    print(paths)
     return verify_path(paths, rpath)
 
 
 def verify_user_locquery(req: Request, user: User = Depends(get_user_info)):
     rquery: str = req.url.query
-    print(rquery)
     if len(rquery) > 0:
         qparam = rquery.split("=").pop(1).split(",")
-        print(qparam)
         parameters: list = user.locations
-        print(parameters)
         return verify_parameters(parameters, qparam)
     else:
         return False
@@ -128,7 +115,6 @@ def verify_path(paths: list, path: str):
 def verify_parameters(user_parameters: list, query_parameters: list):
     sparam = set(user_parameters)
     sdiff = [x for x in query_parameters if x not in sparam]
-    print(sdiff)
     ssdiff = f" {', '.join(sdiff)}"
     if len(sdiff) == 0:
         sdiff = query_parameters
