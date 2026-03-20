@@ -1,7 +1,7 @@
 import pandas as pd
 import requests
 import json
-from app.services.weather import weather_static
+import weather_static
 
 headers = weather_static.met_required_headers
 url = weather_static.met_base_url
