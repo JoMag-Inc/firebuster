@@ -1,26 +1,32 @@
+from functools import lru_cache
 from decouple import config
 from keycloak import KeycloakOpenID
 from fastapi import HTTPException, status, Depends, Request
 from fastapi.security import OpenIdConnect
 from app.kc.models import User
 
-keycloak_openid = KeycloakOpenID(
-    server_url=config("server_url"), realm_name=config("realm"), client_id=""
-)
-# Get Token from HTTP Request object of the restapi endpoint
-oidc_scheme = OpenIdConnect(
-    openIdConnectUrl=f"{config('server_url')}/realms/{config('realm')}/.well-known/openid-configuration"
-)
+@lru_cache
+def _keycloak_openid():
+    return KeycloakOpenID(
+        server_url=config("server_url"), realm_name=config("realm"), client_id=""
+    )
 
-def get_jwttoken(token: str = Depends(oidc_scheme)):
-    if token.startswith("Bearer "):
+@lru_cache
+def _oidc_scheme():
+    return OpenIdConnect(
+        openIdConnectUrl=f"{config('server_url')}/realms/{config('realm')}/.well-known/openid-configuration"
+    )
+
+async def get_jwttoken(request: Request) -> str:
+    token = await _oidc_scheme()(request)
+    if token and token.startswith("Bearer "):
         token = token[7:]
     return token
 
 # Decode Token
-async def get_payload(token=Depends(get_jwttoken)) -> dict:
+async def get_payload(token: str = Depends(get_jwttoken)) -> dict:
     try:
-        return keycloak_openid.decode_token(token)
+        return _keycloak_openid().decode_token(token)
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
