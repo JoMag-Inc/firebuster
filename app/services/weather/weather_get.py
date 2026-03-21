@@ -30,8 +30,10 @@ def process_weather_data(raw_data):
     }
 
     df_filtered = df[column_map.keys()].rename(columns=column_map)
-    #df_filtered.to_csv('weather_data.csv', index=False) #write to file
     
-    return df_filtered
-print("done")
-print(process_weather_data(get_weather_data()))
+    return df_filtered.to_csv(index=False)
+
+# Avoid side effects during import
+if __name__ == "__main__":
+    print("done")
+    print(process_weather_data(get_weather_data()))

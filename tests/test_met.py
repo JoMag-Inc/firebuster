@@ -1,29 +1,30 @@
-import csv
+import pandas as pd
+from pandas.api.types import is_numeric_dtype
+import io
+import json
 import unittest
-from unittest.mock import patch, MagicMock
 from app.services.weather.weather_get import process_weather_data
-from fastapi.testclient import TestClient
-
-lat = 21.37852609079965
-lon = 39.79370287864698
 
 class TestMetClient(unittest.TestCase):
-    #Mock json/api test
-    """def getJson(self):
-        with open ('tests/data/test_data_api.json', 'r') as f:
-            self.mock_json_data = json.load(f)
+    def test_json_to_csv(self):
+        with open('tests/data/json_reference.json', 'r') as f:
+            json_data = json.load(f)
 
+        csv_output = process_weather_data(json_data)
 
-    @patch('app.services.weather.weather_get.requests.get')
-    def test_get_met(self, mock_get):
-        mock_get.return_value.json.return_value = self.mock_json_data
-        mock_get.return_value.status_code = 200"""
-    
-    #CSV parsing test
-    #get reference file
-    def test_get_csv_reference(self):
-        with open ('tests/data/csv_reference.csv', 'r') as f:
-            reader = csv.reader(f)
-            expected_data = list(reader)
-        self.assertEqual(expected_data[4][1], '30.7')
+        # Function contract: returns CSV string
+        self.assertIsInstance(csv_output, str)
+        self.assertTrue(csv_output.strip())
+
+        # Parse CSV string for structural validation
+        df = pd.read_csv(io.StringIO(csv_output))
+
+        expected_columns = ['timestamp', 'temperature', 'humidity', 'wind_speed']
+        self.assertListEqual(list(df.columns), expected_columns)
+
+        self.assertFalse(df.isnull().any().any(), "CSV contains missing values")
+        self.assertTrue(df['timestamp'].astype(str).str.len().gt(0).all())
+        self.assertTrue(is_numeric_dtype(df['temperature']))
+        self.assertTrue(is_numeric_dtype(df['humidity']))
+        self.assertTrue(is_numeric_dtype(df['wind_speed']))
         
