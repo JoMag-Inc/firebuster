@@ -1,7 +1,7 @@
 import pandas as pd
 import requests
 import json
-import weather_static
+from app.services.weather import weather_static
 
 headers = weather_static.met_required_headers
 url = weather_static.met_base_url
@@ -34,4 +34,4 @@ def process_weather_data(raw_data):
     
     return df_filtered
 print("done")
-#print(process_weather_data(get_weather_data()))
+print(process_weather_data(get_weather_data()))

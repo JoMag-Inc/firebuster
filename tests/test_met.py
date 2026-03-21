@@ -1,9 +1,7 @@
-import json
+import csv
 import unittest
 from unittest.mock import patch, MagicMock
-from app.main import app
 from app.services.weather.weather_get import process_weather_data
-from app.services.weather.weather_get import get_weather_data
 from fastapi.testclient import TestClient
 
 lat = 21.37852609079965
@@ -23,8 +21,9 @@ class TestMetClient(unittest.TestCase):
     
     #CSV parsing test
     #get reference file
-    def get_csv_reference(self):
+    def test_get_csv_reference(self):
         with open ('tests/data/csv_reference.csv', 'r') as f:
-            expected_data = f.read()
-            
-        self.assertEqual()
+            reader = csv.reader(f)
+            expected_data = list(reader)
+        self.assertEqual(expected_data[4][1], '30.7')
+        
