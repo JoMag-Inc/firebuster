@@ -10,20 +10,26 @@ class TestMetClient(unittest.TestCase):
         with open('tests/data/json_reference.json', 'r') as f:
             json_data = json.load(f)
 
+        #convert json to csv
         csv_output = process_weather_data(json_data)
 
-        # Function contract: returns CSV string
+        #check process_weather_data actually returned a csv string
         self.assertIsInstance(csv_output, str)
+        #check if string is empty
         self.assertTrue(csv_output.strip())
 
-        # Parse CSV string for structural validation
+        #io.StringIO(csv_output) to treat like file, use pandas to read into dataframe
         df = pd.read_csv(io.StringIO(csv_output))
 
+        #check columns and names
         expected_columns = ['timestamp', 'temperature', 'humidity', 'wind_speed']
         self.assertListEqual(list(df.columns), expected_columns)
 
+        #check columns if any missing value, if yes, print 
         self.assertFalse(df.isnull().any().any(), "CSV contains missing values")
+        #check timestamp. convert to string, check string length, makes sure >0, for all tstmp
         self.assertTrue(df['timestamp'].astype(str).str.len().gt(0).all())
+        #check type
         self.assertTrue(is_numeric_dtype(df['temperature']))
         self.assertTrue(is_numeric_dtype(df['humidity']))
         self.assertTrue(is_numeric_dtype(df['wind_speed']))
