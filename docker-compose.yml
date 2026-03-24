@@ -1,4 +1,16 @@
 services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: firebuster:latest
+    ports:
+      - "8000:8000"
+    environment:
+      client_id: ${client_id:-firebuster-client}
+    depends_on:
+      - keycloak
+
   keycloak:
     image: quay.io/keycloak/keycloak:latest
     ports:

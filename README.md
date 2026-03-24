@@ -104,6 +104,23 @@ You can also use the built in `/docs` route in FastAPI:
 http://127.0.0.1:8000/docs
 ```
 
+## Docker
+
+The app can be built into a Docker image and started from Compose.
+
+```bash
+# Create local environment file (first time only)
+cp .env.example .env
+
+# Build and start both app + keycloak
+docker compose up --build
+
+# Start in background
+docker compose up --build -d
+```
+
+The API will be available at `http://127.0.0.1:8000`.
+
 ## Key cloak
 
 Authentication to the rest api is managed using Key Cloak. We run it in a dockercontainer, and it will connect to a postgres database for storing users
