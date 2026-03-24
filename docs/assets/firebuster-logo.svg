@@ -1,0 +1,29 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="128" y1="12" x2="128" y2="244" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1A1F26"/>
+      <stop offset="1" stop-color="#0F1419"/>
+    </linearGradient>
+    <linearGradient id="ring" x1="48" y1="48" x2="208" y2="208" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#EF4444"/>
+      <stop offset="1" stop-color="#B91C1C"/>
+    </linearGradient>
+    <linearGradient id="flame" x1="128" y1="74" x2="128" y2="184" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FBBF24"/>
+      <stop offset="0.55" stop-color="#F97316"/>
+      <stop offset="1" stop-color="#C2410C"/>
+    </linearGradient>
+    <linearGradient id="flame-core" x1="128" y1="96" x2="128" y2="168" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF7ED"/>
+      <stop offset="1" stop-color="#FED7AA"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="16" y="16" width="224" height="224" rx="56" fill="url(#bg)"/>
+
+  <path d="M128 70C124 84 113 92 104 105C97 116 92 127 92 141C92 167 108 186 128 186C148 186 164 167 164 141C164 121 154 107 144 94C138 86 133 80 128 70Z" fill="url(#flame)"/>
+  <path d="M128 95C123 105 116 111 112 120C108 126 106 133 106 141C106 155 115 166 128 170C141 166 150 155 150 141C150 130 145 121 138 113C134 108 131 103 128 95Z" fill="url(#flame-core)"/>
+
+  <circle cx="128" cy="128" r="78" stroke="url(#ring)" stroke-width="20"/>
+  <path d="M74 184L184 74" stroke="url(#ring)" stroke-width="22" stroke-linecap="round"/>
+</svg>
