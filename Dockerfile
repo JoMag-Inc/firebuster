@@ -19,12 +19,12 @@ RUN pip install --no-cache-dir uv
 
 # Copy the list of our dependencies from the computer into the container.
 COPY pyproject.toml uv.lock README.md ./
-# Copy our actual application code into the container.
-COPY app ./app
 
 # Install all the Python packages our app needs.
 RUN uv sync --frozen --no-dev
 
+# Copy our actual application code into the container.
+COPY app ./app
 # Tell Docker this app listens on port 8000.
 EXPOSE 8000
 
