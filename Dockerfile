@@ -21,7 +21,7 @@ RUN pip install --no-cache-dir uv
 COPY pyproject.toml uv.lock README.md ./
 
 # Install all the Python packages our app needs.
-RUN uv sync --frozen --no-dev
+RUN uv sync --locked --no-dev
 
 # Copy our actual application code into the container.
 COPY app ./app
