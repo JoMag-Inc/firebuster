@@ -164,6 +164,44 @@ docker compose down -v
 | Keycloak | `http://localhost:8080` |
 | PostgreSQL | `localhost:5432` |
 
+## Usage
+
+All protected endpoints require a Bearer token from Keycloak. Obtain one first:
+
+```bash
+token=$(curl -s -X POST "http://localhost:8080/realms/Firebuster/protocol/openid-connect/token" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "client_id=firebuster-api&username=<user>&password=<password>&grant_type=password" \
+  | jq -r '.access_token')
+```
+
+**Health check (no auth required):**
+
+```bash
+curl http://localhost:8000/api/health
+```
+
+**TTF calculation:**
+
+```bash
+curl -s "http://localhost:8000/api/v1/ttf/?longitude=10&latitude=60" \
+  -H "Authorization: Bearer $token" | jq
+```
+
+Returns a list of TTF (time to flashover) values in hours paired with the weather data used for each calculation.
+
+**Protected endpoints:**
+
+| Endpoint | Required role |
+|---|---|
+| `GET /api/v1/protected` | `USER` |
+| `GET /api/v1/protected/service` | `APP_USER` |
+| `GET /api/v1/admin` | `ADMIN` |
+| `GET /api/v1/admin/service` | `APP_ADMIN` |
+| `GET /api/v1/ttf/` | `USER` |
+
+The interactive API docs are available at `http://localhost:8000/docs` while the server is running.
+
 ## Keycloak
 
 Authentication to the REST API is managed using Keycloak. It runs in a Docker container backed by a PostgreSQL database for persistent storage. The Firebuster realm and client are imported automatically on first boot from `kcdb/data/import/realm-export.json`.
