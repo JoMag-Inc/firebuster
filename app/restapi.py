@@ -1,3 +1,6 @@
+import json
+from app.services.weather.weather_get import process_weather_data, get_weather_data_for_coordinates
+from app.services.ttf_calculator import TTFCalculator 
 from decouple import config
 from fastapi import FastAPI, Depends, status
 from app.kc.auth import verify_admin_role, verify_user_role, verify_sadmin_role, verify_suser_role, verify_user_path, \
@@ -46,3 +49,12 @@ def protected_user_query(user: bool = Depends(verify_user_locquery)):
 @app.get("/api/v1/{location}")
 def protected_user_loc(location: str, user: bool = Depends(verify_user_path)):
     return {"message": f'This is a protected resource for any user that is registered on location = {location}.'}
+
+@app.get("/api/v1/ttf/")
+def protected_get_ttf_user(longitude: int=0, latitude: int=0, user:bool = Depends(verify_user_role)):
+    weather_data_json = get_weather_data_for_coordinates(longitude, latitude)
+
+    weather_data_csv = process_weather_data(weather_data_json)
+
+    ttf_points = TTFCalculator.calculate_from_csv(weather_data_csv)
+    return [{"ttf": point.ttf, "weather_point": point.weather_point.model_dump(mode="json")} for point in ttf_points]
