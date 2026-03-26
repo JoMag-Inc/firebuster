@@ -53,7 +53,7 @@ def protected_user_loc(location: str, user: bool = Depends(verify_user_path)):
 @app.get("/api/v1/ttf/")
 def protected_get_ttf_user(longitude: float = Query(ge=-180, le=180), latitude: float = Query(ge=-90, le=90), user:bool = Depends(verify_user_role)):
     try:
-        weather_data_json = get_weather_data_for_coordinates(longitude, latitude)
+        weather_data_json = get_weather_data_for_coordinates(longitude=longitude, latitude=latitude)
     except Exception:
         raise HTTPException(status_code=503, detail="Failed to fetch weather data")
     weather_data_csv = process_weather_data(weather_data_json)
