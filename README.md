@@ -164,6 +164,30 @@ docker compose down -v
 | Keycloak | `http://localhost:8080` |
 | PostgreSQL | `localhost:5432` |
 
+## CD: Publish Docker image to GHCR
+
+This repository now includes a release workflow in `.github/workflows/release.yml`.
+
+What it does:
+
+- Builds the Docker image from `Dockerfile`.
+- Pushes image to GitHub Container Registry (GHCR):
+  `ghcr.io/<owner>/<repo>`
+- Runs automatically when you push a version tag like `v0.1.0`.
+
+Create and push a release tag:
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+After the workflow finishes, pull the image with:
+
+```bash
+docker pull ghcr.io/<owner>/<repo>:v0.1.0
+```
+
 ## Usage
 
 All protected endpoints require a Bearer token from Keycloak. Obtain one first:
