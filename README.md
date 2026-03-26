@@ -69,6 +69,23 @@ make test
 
 It contains a command for locating all tests in the tests/ directory and runs them
 
+In some tests we use `Mock` and `patch` to fake external API calls.
+This makes tests faster, more stable, and independent of internet/API uptime.
+
+## MET integration scope
+
+Current MET scope in this branch:
+
+- Fetch weather data from MET using explicit coordinates (`lat`, `lon`).
+- Transform MET payload to CSV with columns needed by the TTF calculator:
+	`timestamp`, `temperature`, `humidity`, `wind_speed`.
+
+Not included in this branch:
+
+- Converting user location text (for example "Førde in Norway") to coordinates.
+- UI input forms and frontend integration.
+- End-to-end API endpoint that chains location -> MET -> TTF.
+
 ## FAST API
 
 Firebuster uses FastAPI for creating its endpoints. Here are some run instructions to get the server up and going
