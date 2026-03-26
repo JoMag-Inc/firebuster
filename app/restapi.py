@@ -56,7 +56,6 @@ def protected_get_ttf_user(longitude: float = Query(ge=-180, le=180), latitude: 
         weather_data_json = get_weather_data_for_coordinates(longitude, latitude)
     except Exception:
         raise HTTPException(status_code=503, detail="Failed to fetch weather data")
-    weather_data_json = get_weather_data_for_coordinates(longitude, latitude)
     weather_data_csv = process_weather_data(weather_data_json)
     ttf_points = TTFCalculator.calculate_from_csv(weather_data_csv)
 
