@@ -61,5 +61,7 @@ def protected_get_ttf_user(longitude: float = Query(ge=-180, le=180), latitude: 
 
     if not ttf_points:
         raise HTTPException(status_code=404, detail="No TTF data available for the given coordinates")
-    res = [{"ttf": point.ttf, "weather_point": point.weather_point.model_dump(mode="json")} for point in ttf_points]
+    res = [] 
+    for point in ttf_points:
+        res.append({"ttf": point.ttf, "weather_point": point.weather_point.model_dump(mode="json")})
     return res
