@@ -27,7 +27,6 @@ async def get_payload(token: str = Depends(get_jwttoken)) -> dict:
 
 
 async def get_user_info(payload: dict = Depends(get_payload)) -> User:
-    print(payload)
     client_id = payload.get("azp")
     try:
         return User(
