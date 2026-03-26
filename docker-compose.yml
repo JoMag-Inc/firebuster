@@ -8,6 +8,8 @@ services:
       - "8000:8000"
     environment:
       client_id: ${client_id:-firebuster-client}
+      server_url: ${server_url}
+      realm: ${realm}
     depends_on:
       - keycloak
 
