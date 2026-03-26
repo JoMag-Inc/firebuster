@@ -1,10 +1,10 @@
 .PHONY: dev prod
 
 dev:
-	uv run fastapi dev app/main.py
+	uv run fastapi dev app/restapi.py
 
 prod:
-	uv run fastapi run app/main.py
+	uv run python -m app.main
 
 test:
 	uv run python -m unittest discover -s tests

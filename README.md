@@ -120,3 +120,50 @@ You can also use the built in `/docs` route in FastAPI:
 ```bash
 http://127.0.0.1:8000/docs
 ```
+
+## Docker
+
+The app can be built into a Docker image and started from Compose. The stack runs three services: the Firebuster API, Keycloak, and a PostgreSQL database.
+
+**First time setup:**
+
+```bash
+# Copy and fill in the environment file
+cp .env.example .env
+```
+
+Edit `.env` with your values — see `.env.example` for the required fields.
+
+**Start the stack:**
+
+```bash
+# Build and start in the foreground
+docker compose up --build
+
+# Or start in the background
+docker compose up --build -d
+```
+
+**Stop the stack:**
+
+```bash
+# Stop containers — database data is preserved
+docker compose down
+
+# Stop containers AND delete the database volume (destructive — all data lost)
+docker compose down -v
+```
+
+> **Warning:** `docker compose down -v` permanently deletes the PostgreSQL volume. Only use this if you want to reset the database to a clean state (e.g. during development). Never run this on a production server unless you intend to wipe all Keycloak data.
+
+**Services and ports:**
+
+| Service | URL |
+|---|---|
+| Firebuster API | `http://localhost:8000` |
+| Keycloak | `http://localhost:8080` |
+| PostgreSQL | `localhost:5432` |
+
+## Keycloak
+
+Authentication to the REST API is managed using Keycloak. It runs in a Docker container backed by a PostgreSQL database for persistent storage. The Firebuster realm and client are imported automatically on first boot from `kcdb/data/import/realm-export.json`.

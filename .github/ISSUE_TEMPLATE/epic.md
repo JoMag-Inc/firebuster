@@ -1,7 +1,7 @@
 ---
 name: Epic
 about: A large body of work that can be broken down into user stories
-title: "Epic: "
+title: "Epic X: <title>"
 labels: epic
 assignees: ""
 ---

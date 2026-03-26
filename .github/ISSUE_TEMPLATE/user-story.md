@@ -1,7 +1,7 @@
 ---
 name: User Story
 about: A user-centered requirement with implementation details
-title: "US: "
+title: "USX.Y: <title>"
 labels: user-story
 assignees: ""
 ---
