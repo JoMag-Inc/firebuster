@@ -1,4 +1,4 @@
-![GitHub branch status](https://img.shields.io/github/checks-status/JoMag-Inc/firebuster)
+![GitHub branch status](https://img.shields.io/github/checks-status/JoMag-Inc/firebuster/main)
 
 # firebuster
 
