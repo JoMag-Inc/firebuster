@@ -1,5 +1,5 @@
 # Start with a bare-bones Python 3.13 computer.
-FROM python:3.13-slim
+FROM python:3.14-slim
 
 # Don't create extra junk files while running Python.
 ENV PYTHONDONTWRITEBYTECODE=1
