@@ -1,4 +1,4 @@
-[](https://img.shields.io/badge/build-passing-brightgreen?style=for-the-badge)
+![GitHub branch status](https://img.shields.io/github/checks-status/JoMag-Inc/firebuster)
 
 # firebuster
 
