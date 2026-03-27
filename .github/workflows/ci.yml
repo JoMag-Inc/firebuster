@@ -1,33 +1,71 @@
+# This is the workflow name shown in GitHub Actions.
 name: ci
-on: 
+
+# Run this workflow in two cases:
+# 1) when a PR is opened/updated
+# 2) when code is pushed to main
+on:
   push:
     branches: [main]
   pull_request:
 
+# If someone pushes multiple commits quickly,
+# cancel old runs and keep only the newest one.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# CI is split into clear jobs.
 jobs:
-  ci:
+  # Job 1: lint checks for important code issues.
+  lint:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v6
-      
-      - name: install-uv
+      - name: 1. Checkout code
+        uses: actions/checkout@v6
+
+      - name: 2. Install uv
         uses: astral-sh/setup-uv@v7
         with:
-          #specific version of uv
           version: "0.10.2"
-          
-      - name: Set up Python
+          enable-cache: true
+
+      - name: 3. Set up Python
         uses: actions/setup-python@v6
         with:
           python-version-file: ".python-version"
-          
-      - name: Install the project
+
+      - name: 4. Run lint checks
+        run: make lint
+
+  # Job 2: run unit tests.
+  unit-tests:
+    # Tests start only after lint is successful.
+    needs: [lint]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: 1. Checkout code
+        uses: actions/checkout@v6
+
+      - name: 2. Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: "0.10.2"
+          enable-cache: true
+
+      - name: 3. Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version-file: ".python-version"
+
+      - name: 4. Install dependencies
         run: uv sync --locked --all-extras --dev
 
-      - name: Run tests
+      - name: 5. Run unit tests
         run: uv run python -m unittest discover -s tests
         env:
+          # These are fake values for CI tests.
           server_url: http://localhost:8080
           realm: test
           client_id: test
-      
+
