@@ -1,4 +1,8 @@
-![GitHub branch status](https://img.shields.io/github/checks-status/JoMag-Inc/firebuster/main)
+[![CI](https://github.com/JoMag-Inc/firebuster/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/JoMag-Inc/firebuster/actions/workflows/ci.yml)
+[![Docker Publish](https://github.com/JoMag-Inc/firebuster/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/JoMag-Inc/firebuster/actions/workflows/docker-publish.yml)
+[![GitHub release](https://img.shields.io/github/v/release/JoMag-Inc/firebuster)](https://github.com/JoMag-Inc/firebuster/releases)
+[![Python](https://img.shields.io/badge/python-3.13+-3776ab?logo=python&logoColor=white)](https://www.python.org/)
+[![Docker Image](https://img.shields.io/badge/ghcr.io-firebuster-0db7ed?logo=docker&logoColor=white)](https://ghcr.io/jomag-inc/firebuster)
 
 # firebuster
 
