@@ -17,3 +17,8 @@ dependencies = [
 
 [tool.uv.sources]
 frcm = { git = "https://github.com/selabhvl/dynamic-frcm-simple.git" }
+
+[dependency-groups]
+dev = [
+    "ruff>=0.15.8",
+]
