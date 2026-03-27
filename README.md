@@ -1,3 +1,5 @@
+[](https://img.shields.io/badge/build-passing-brightgreen?style=for-the-badge)
+
 # firebuster
 
 Firebuster is a REST API service that can calculate the TTF (time to flashover) for a given location.
@@ -78,7 +80,7 @@ Current MET scope in this branch:
 
 - Fetch weather data from MET using explicit coordinates (`lat`, `lon`).
 - Transform MET payload to CSV with columns needed by the TTF calculator:
-	`timestamp`, `temperature`, `humidity`, `wind_speed`.
+  `timestamp`, `temperature`, `humidity`, `wind_speed`.
 
 Not included in this branch:
 
@@ -158,11 +160,11 @@ docker compose down -v
 
 **Services and ports:**
 
-| Service | URL |
-|---|---|
+| Service        | URL                     |
+| -------------- | ----------------------- |
 | Firebuster API | `http://localhost:8000` |
-| Keycloak | `http://localhost:8080` |
-| PostgreSQL | `localhost:5432` |
+| Keycloak       | `http://localhost:8080` |
+| PostgreSQL     | `localhost:5432`        |
 
 ## CD: Publish Docker image to GHCR
 
@@ -216,13 +218,13 @@ Returns a list of TTF (time to flashover) values in hours paired with the weathe
 
 **Protected endpoints:**
 
-| Endpoint | Required role |
-|---|---|
-| `GET /api/v1/protected` | `USER` |
-| `GET /api/v1/protected/service` | `APP_USER` |
-| `GET /api/v1/admin` | `ADMIN` |
-| `GET /api/v1/admin/service` | `APP_ADMIN` |
-| `GET /api/v1/ttf/` | `USER` |
+| Endpoint                        | Required role |
+| ------------------------------- | ------------- |
+| `GET /api/v1/protected`         | `USER`        |
+| `GET /api/v1/protected/service` | `APP_USER`    |
+| `GET /api/v1/admin`             | `ADMIN`       |
+| `GET /api/v1/admin/service`     | `APP_ADMIN`   |
+| `GET /api/v1/ttf/`              | `USER`        |
 
 The interactive API docs are available at `http://localhost:8000/docs` while the server is running.
 
