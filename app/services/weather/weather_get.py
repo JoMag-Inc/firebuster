@@ -15,6 +15,7 @@ MET_URL = weather_static.met_base_url
 MET_TIMEOUT_SECONDS = 10
 INVALID_PAYLOAD_MESSAGE = "Invalid MET payload: missing properties.timeseries list"
 
+
 def get_weather_data_for_coordinates(latitude: float, longitude: float) -> dict:
     """Get MET weather data for one latitude/longitude pair.
 
@@ -32,13 +33,16 @@ def get_weather_data_for_coordinates(latitude: float, longitude: float) -> dict:
     params = {"lat": latitude, "lon": longitude}
 
     # Call MET API.
-    response = requests.get(MET_URL, params=params, headers=MET_HEADERS, timeout=MET_TIMEOUT_SECONDS)
+    response = requests.get(
+        MET_URL, params=params, headers=MET_HEADERS, timeout=MET_TIMEOUT_SECONDS
+    )
 
     # Raise an error for non-200 responses.
     response.raise_for_status()
 
     # Convert response body to Python dict.
     return response.json()
+
 
 def process_weather_data(raw_data: dict) -> str:
     """Turn MET JSON data into CSV text.
