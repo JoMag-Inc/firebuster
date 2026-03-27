@@ -4,16 +4,24 @@ from fastapi import HTTPException, status, Depends, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from app.kc.models import User
 
+
 def keycloak_openid():
     return KeycloakOpenID(
-        server_url=config("server_url"), realm_name=config("realm"), client_id=config("client_id")
+        server_url=config("server_url"),
+        realm_name=config("realm"),
+        client_id=config("client_id"),
     )
 
 
 bearer = HTTPBearer()
 
-async def get_jwttoken(credentials: HTTPAuthorizationCredentials = Depends(bearer)) -> str:
-      return credentials.credentials
+
+async def get_jwttoken(
+    credentials: HTTPAuthorizationCredentials = Depends(bearer),
+) -> str:
+    return credentials.credentials
+
+
 # Decode Token
 async def get_payload(token: str = Depends(get_jwttoken)) -> dict:
     try:

@@ -19,17 +19,21 @@ import unittest
 from unittest.mock import Mock, patch
 import requests
 
-from app.services.weather.weather_get import get_weather_data_for_coordinates, process_weather_data
+from app.services.weather.weather_get import (
+    get_weather_data_for_coordinates,
+    process_weather_data,
+)
+
 
 class TestMetClient(unittest.TestCase):
     """Tests for downloading and processing MET weather data."""
 
-    @patch('app.services.weather.weather_get.requests.get')
+    @patch("app.services.weather.weather_get.requests.get")
     def test_get_weather_data_for_coordinates_success(self, mock_get):
         """Should return JSON when the MET call is successful."""
         # Arrange
         # Fake API payload we expect back from MET.
-        expected_payload = {'properties': {'timeseries': []}}
+        expected_payload = {"properties": {"timeseries": []}}
 
         # Build a fake HTTP response object.
         mock_response = Mock()
@@ -55,18 +59,20 @@ class TestMetClient(unittest.TestCase):
         _, kwargs = mock_get.call_args
 
         # Check that coordinates were passed correctly.
-        self.assertEqual({'lat': 61.452, 'lon': 5.857}, kwargs['params'])
+        self.assertEqual({"lat": 61.452, "lon": 5.857}, kwargs["params"])
 
         # Check that timeout value is sent.
-        self.assertEqual(10, kwargs['timeout'])
+        self.assertEqual(10, kwargs["timeout"])
 
-    @patch('app.services.weather.weather_get.requests.get')
+    @patch("app.services.weather.weather_get.requests.get")
     def test_get_weather_data_for_coordinates_http_error_raises(self, mock_get):
         """Should raise HTTPError when MET returns an HTTP error."""
         # Arrange
         # Fake response where raise_for_status throws HTTPError.
         mock_response = Mock()
-        mock_response.raise_for_status.side_effect = requests.HTTPError('MET API failure')
+        mock_response.raise_for_status.side_effect = requests.HTTPError(
+            "MET API failure"
+        )
         mock_get.return_value = mock_response
 
         # Act + Assert
@@ -74,12 +80,12 @@ class TestMetClient(unittest.TestCase):
         with self.assertRaises(requests.HTTPError):
             get_weather_data_for_coordinates(61.452, 5.857)
 
-    @patch('app.services.weather.weather_get.requests.get')
+    @patch("app.services.weather.weather_get.requests.get")
     def test_get_weather_data_for_coordinates_request_failure_raises(self, mock_get):
         """Should raise RequestException on network/request failure."""
         # Arrange
         # Simulate a network/transport failure before a response is returned.
-        mock_get.side_effect = requests.RequestException('Network error')
+        mock_get.side_effect = requests.RequestException("Network error")
 
         # Act + Assert
         # Verify our function does not hide the request exception.
@@ -89,7 +95,7 @@ class TestMetClient(unittest.TestCase):
     def test_json_to_csv(self):
         """Should convert sample MET JSON into valid CSV output."""
         # Arrange
-        with open('tests/data/json_reference.json', 'r') as f:
+        with open("tests/data/json_reference.json", "r") as f:
             json_data = json.load(f)
 
         # Act
@@ -106,23 +112,23 @@ class TestMetClient(unittest.TestCase):
         df = pd.read_csv(io.StringIO(csv_output))
 
         # Check expected column names.
-        expected_columns = ['timestamp', 'temperature', 'humidity', 'wind_speed']
+        expected_columns = ["timestamp", "temperature", "humidity", "wind_speed"]
         self.assertListEqual(list(df.columns), expected_columns)
 
         # Check that there are no missing values.
         self.assertFalse(df.isnull().any().any(), "CSV contains missing values")
         # Check that every timestamp is present.
-        self.assertTrue(df['timestamp'].astype(str).str.len().gt(0).all())
+        self.assertTrue(df["timestamp"].astype(str).str.len().gt(0).all())
         # Check that number columns are numeric.
-        self.assertTrue(is_numeric_dtype(df['temperature']))
-        self.assertTrue(is_numeric_dtype(df['humidity']))
-        self.assertTrue(is_numeric_dtype(df['wind_speed']))
+        self.assertTrue(is_numeric_dtype(df["temperature"]))
+        self.assertTrue(is_numeric_dtype(df["humidity"]))
+        self.assertTrue(is_numeric_dtype(df["wind_speed"]))
 
     def test_process_weather_data_malformed_payload_raises(self):
         """Should raise ValueError if required MET fields are missing."""
         # Arrange
         # This payload is missing properties.timeseries on purpose.
-        malformed_payload = {'type': 'Feature'}
+        malformed_payload = {"type": "Feature"}
 
         # Act + Assert
         # Verify we get a clear validation error.
@@ -131,13 +137,13 @@ class TestMetClient(unittest.TestCase):
 
         # Assert
         # Check that the message points to the missing field path.
-        self.assertIn('properties.timeseries', str(context.exception))
+        self.assertIn("properties.timeseries", str(context.exception))
 
     def test_process_weather_data_empty_timeseries_returns_header_only(self):
         """Should return only the CSV header when timeseries is empty."""
         # Arrange
         # Valid MET shape, but with no rows.
-        payload = {'properties': {'timeseries': []}}
+        payload = {"properties": {"timeseries": []}}
 
         # Act
         # Convert to CSV.
@@ -146,4 +152,3 @@ class TestMetClient(unittest.TestCase):
         # Assert
         # With no rows, only header line should be present.
         self.assertEqual("timestamp,temperature,humidity,wind_speed\r\n", csv_output)
-        
