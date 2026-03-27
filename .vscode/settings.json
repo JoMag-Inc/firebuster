@@ -2,9 +2,7 @@
   "[python]": {
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "charliermarsh.ruff",
-    "editor.codeActionsOnSave": {
-      "source.organizeImports.ruff": "explicit"
-    }
+    "editor.codeActionsOnSave": {}
   },
-  "ruff.interpreter": [".venv/bin/python"]
+  "ruff.path": [".venv/bin/ruff"]
 }
