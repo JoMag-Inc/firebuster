@@ -166,7 +166,7 @@ docker compose down -v
 
 ## CD: Publish Docker image to GHCR
 
-This repository now includes a release workflow in `.github/workflows/release.yml`.
+This repository now includes a release workflow in `.github/workflows/docker-publish.yml`.
 
 What it does:
 
@@ -185,7 +185,7 @@ git push origin v0.1.0
 After the workflow finishes, pull the image with:
 
 ```bash
-docker pull ghcr.io/<owner>/<repo>:v0.1.0
+docker pull ghcr.io/<owner>/firebuster:v0.1.0
 ```
 
 ## Usage
