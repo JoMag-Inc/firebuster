@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: firebuster:latest
+    image: ghcr.io/jomag-inc/firebuster:v0.1.1
     ports:
       - "8000:8000"
     environment:
