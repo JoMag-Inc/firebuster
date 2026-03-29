@@ -14,23 +14,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-      - uses: actions/checkout@v4
+        uses: actions/checkout@v4
 
       - name: Copy file via SSH
-      - uses: appleboy/scp-action@v0.1.7
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.FIREBUSTER_IP}}
-          username: ${{FIREBUSTER_USER}}
-          key: ${{FIREBUSTER_SERVER_ACCESS}}
+          username: ${{secrets.FIREBUSTER_USER}}
+          key: ${{secrets.FIREBUSTER_SERVER_ACCESS}}
           source: "docker-compose.yml"
           target: "~/firebuster-compose"
 
       - name: Refresh Docker
-      - uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.FIREBUSTER_IP}}
-          username: ${{FIREBUSTER_USER}}
-          key: ${{FIREBUSTER_SERVER_ACCESS}}
+          username: ${{ secrets.FIREBUSTER_USER }}
+          key: ${{ secrets.FIREBUSTER_SERVER_ACCESS }}
           script: |
             cd ~/firebuster-compose
             docker compose pull
