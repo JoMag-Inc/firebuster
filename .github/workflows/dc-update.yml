@@ -33,5 +33,5 @@ jobs:
           key: ${{ secrets.FIREBUSTER_SERVER_ACCESS }}
           script: |
             cd ~/firebuster-compose
-            docker compose pull
-            docker compose up -d
+            sudo docker compose pull
+            sudo docker compose up -d
