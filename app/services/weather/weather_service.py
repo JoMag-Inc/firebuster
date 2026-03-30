@@ -6,7 +6,7 @@ class WeatherService:
         self.repository = WeatherRepository()
 
     def get_weather(self):
-        weather_csv = self.repository.get_weather()
+        weather_csv = self.repository.fetch_weather()
         return weather_csv
 
     def save_weather_csv(self, weather_csv):

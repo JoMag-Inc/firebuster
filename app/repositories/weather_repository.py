@@ -2,7 +2,7 @@ import psycopg2
 
 
 class WeatherRepository:
-    def fetchWeather(self):
+    def fetch_weather(self):
         conn = psycopg2.connect(
             database="postgres",
             user="postgres",
