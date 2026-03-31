@@ -7,7 +7,7 @@ services:
       client_id: ${client_id:-firebuster-client}
       server_url: ${server_url}
       realm: ${realm}
-      DATABASE_URL: postgresql+psycopg2://${DB_USERNAME}:${DB_PASSWORD}@postgres:5432/${DB_NAME}
+      DATABASE_URL: ${DATABASE_URL}
     depends_on:
       - keycloak
 
