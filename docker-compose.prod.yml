@@ -1,16 +1,13 @@
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: firebuster:local
+    image: ghcr.io/jomag-inc/firebuster:latest
     ports:
       - "8000:8000"
     environment:
       client_id: ${client_id:-firebuster-client}
       server_url: ${server_url}
       realm: ${realm}
-      DATABASE_URL: postgresql+psycopg2://${DB_USERNAME}:${DB_PASSWORD}@postgres:5432/firebuster
+      DATABASE_URL: postgresql+psycopg2://${DB_USERNAME}:${DB_PASSWORD}@postgres:5432/${DB_NAME}
     depends_on:
       - keycloak
 
@@ -49,7 +46,6 @@ services:
       POSTGRES_DB: ${DB_NAME}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
 
 volumes:
     postgres_data:
