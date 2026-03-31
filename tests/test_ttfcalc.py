@@ -1,6 +1,6 @@
 import unittest
 
-from app.services.ttf_calculator import TTFCalculator, TTFPoint
+from app.services.ttf.ttf_calculator import TTFCalculator, TTFPoint
 from frcm import WeatherDataPoint
 
 

@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 
 from app.models.ttf_result import TTFResult
-from app.services.ttf_calculator import TTFCalculator
+from app.services.ttf.ttf_calculator import TTFCalculator
 
 
 class TTFService:

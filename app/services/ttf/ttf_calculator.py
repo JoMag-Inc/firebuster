@@ -55,9 +55,7 @@ class TTFCalculator:
         ttf_results = []
         for index in range(count):
             ttf_results.append(
-                TTFPoint(
-                    weather_point=data_points[index], ttf=float(ttf_values[index])
-                )
+                TTFPoint(weather_point=data_points[index], ttf=float(ttf_values[index]))
             )
 
         return ttf_results
