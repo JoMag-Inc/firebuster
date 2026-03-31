@@ -6,7 +6,7 @@ from frcm import WeatherData, WeatherDataPoint, compute
 
 
 @dataclass(frozen=True)
-class TTFResult:
+class TTFPoint:
     weather_point: WeatherDataPoint
     ttf: float
 
@@ -35,12 +35,12 @@ class TTFCalculator:
         )
 
     @staticmethod
-    def calculate_from_points(data_points: list[WeatherDataPoint]) -> list[TTFResult]:
+    def calculate_from_points(data_points: list[WeatherDataPoint]) -> list[TTFPoint]:
         """
         Calculate TTF from a list of WeatherDataPoint objects
         Args:
             data_points: List of WeatherDataPoint objects (minimum 2 points required)
-        Returns: List of TTFResult objects with weather context
+        Returns: List of TTFPoint objects with weather context
         Note: The frcm library requires at least 2 data points for gap detection
         """
         if len(data_points) < 2:
@@ -55,7 +55,7 @@ class TTFCalculator:
         ttf_results = []
         for index in range(count):
             ttf_results.append(
-                TTFResult(
+                TTFPoint(
                     weather_point=data_points[index], ttf=float(ttf_values[index])
                 )
             )
@@ -63,11 +63,11 @@ class TTFCalculator:
         return ttf_results
 
     @staticmethod
-    def calculate_from_csv(csv_content: str) -> list[TTFResult]:
+    def calculate_from_csv(csv_content: str) -> list[TTFPoint]:
         """
         Calculate TTF from CSV data
         Expected columns: timestamp, temperature, humidity, wind_speed
-        Returns: List of TTFResult objects with weather context
+        Returns: List of TTFPoint objects with weather context
         Raises:
             ValueError: If CSV is empty, missing required columns, or has invalid data types
         """
