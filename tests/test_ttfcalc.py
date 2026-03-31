@@ -1,6 +1,6 @@
 import unittest
 
-from app.services.ttf_calculator import TTFCalculator, TTFResult
+from app.services.ttf_calculator import TTFCalculator, TTFPoint
 from frcm import WeatherDataPoint
 
 
@@ -34,7 +34,7 @@ class TestTTFCalculator(unittest.TestCase):
 
         self.assertIsNotNone(results)
         self.assertEqual(len(results), 2)
-        self.assertIsInstance(results[0], TTFResult)
+        self.assertIsInstance(results[0], TTFPoint)
         self.assertIsInstance(results[0].weather_point, WeatherDataPoint)
         self.assertEqual(results[0].weather_point.temperature, 10.5)
         self.assertEqual(results[0].weather_point.humidity, 65)
@@ -51,7 +51,7 @@ class TestTTFCalculator(unittest.TestCase):
 
         self.assertIsNotNone(results)
         self.assertGreater(len(results), 0)
-        self.assertIsInstance(results[0], TTFResult)
+        self.assertIsInstance(results[0], TTFPoint)
         self.assertIsInstance(results[0].weather_point, WeatherDataPoint)
         self.assertEqual(results[0].weather_point.temperature, 10.5)
         self.assertEqual(results[0].weather_point.humidity, 65)
