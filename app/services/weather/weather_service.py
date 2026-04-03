@@ -50,11 +50,11 @@ class WeatherService:
             requests.RequestException: If the HTTP request fails
             ValueError: If the response data is invalid
         """
-        data = self.fetch_weather_data(lat, lon)
-        csv_output = self.process_to_csv(data)
+        data = self._fetch_weather_data(lat, lon)
+        csv_output = self._process_to_csv(data)
         return csv_output
 
-    def fetch_weather_data(self, latitude: float, longitude: float) -> dict:
+    def _fetch_weather_data(self, latitude: float, longitude: float) -> dict:
         """Fetch MET weather data for one latitude/longitude pair.
 
         Args:
@@ -84,7 +84,7 @@ class WeatherService:
         # Convert response body to Python dict
         return response.json()
 
-    def process_to_csv(self, raw_data: dict) -> str:
+    def _process_to_csv(self, raw_data: dict) -> str:
         """Convert MET JSON data into CSV text.
 
         The CSV output has these columns:
