@@ -69,3 +69,5 @@ jobs:
           realm: test
           client_id: test
 
+          DATABASE_URL: test
+
