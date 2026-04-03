@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from fastapi import HTTPException
 
 from app.models.ttf_result import TTFResult
 from app.services.ttf.ttf_calculator import TTFCalculator
@@ -14,7 +15,11 @@ class TTFService:
         if cached:
             return cached
 
-        data_csv = self.weather_service.get_weather_at_location(lat, lon)
+        try:
+            data_csv = self.weather_service.get_weather_at_location(lat, lon)
+        except Exception:
+            raise HTTPException(status_code=503, detail="Failed to fetch weather data")
+
         ttf_points = TTFCalculator.calculate_from_csv(data_csv)
 
         result = TTFResult(
