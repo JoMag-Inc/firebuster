@@ -5,10 +5,12 @@ from sqlmodel import Session, select
 
 class TTFReposiotry(ABC):
     @abstractmethod
-    def get(self, lat: float, lon: float) -> TTFResult | None: ...
+    def get(self, lat: float, lon: float) -> TTFResult | None:
+        pass
 
     @abstractmethod
-    def save(self, result: TTFResult) -> None: ...
+    def save(self, result: TTFResult) -> None:
+        pass
 
 
 class PostgresTTFRepository(TTFReposiotry):
