@@ -9,7 +9,7 @@ from app.services.weather.weather_service import WeatherService
 engine = create_engine(config("DATABASE_URL"))
 
 
-def get_ttf_service() -> TTFService:
+def get_ttf_service():
     with Session(engine) as session:
         repo = PostgresTTFRepository(session)
         weather_service = WeatherService()
