@@ -6,11 +6,22 @@ from app.repositories.ttf.ttf_repository import PostgresTTFRepository
 from app.services.ttf.ttf_service import TTFService
 from app.services.weather.weather_service import WeatherService
 
-engine = create_engine(config("DATABASE_URL", default=""))
+
+def _get_engine():
+    url = config("DATABASE_URL", default="")
+    if not url:
+        return None
+    return create_engine(url)
+
+
+engine = _get_engine()
 
 
 def get_ttf_service():
-    with Session(engine) as session:
+    db_engine = engine
+    if db_engine is None:
+        raise RuntimeError("DATABASE_URL environment variable is not set")
+    with Session(db_engine) as session:
         repo = PostgresTTFRepository(session)
         weather_service = WeatherService()
         yield TTFService(repo=repo, weather_service=weather_service)
