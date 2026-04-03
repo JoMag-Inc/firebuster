@@ -6,7 +6,7 @@ from app.repositories.ttf.ttf_repository import PostgresTTFRepository
 from app.services.ttf.ttf_service import TTFService
 from app.services.weather.weather_service import WeatherService
 
-engine = create_engine(config("DATABASE_URL"))
+engine = create_engine(config("DATABASE_URL", default=""))
 
 
 def get_ttf_service():

@@ -14,7 +14,7 @@ from app.kc.auth import (
 app = FastAPI(
     swagger_ui_parameters={"syntaxHighlight": False},
     swagger_ui_init_oauth={
-        "clientId": config("client_id"),
+        "clientId": config("client_id", default="firebuster-api"),
         "usePkceWithAuthorizationCodeGrant": True,
     },
 )

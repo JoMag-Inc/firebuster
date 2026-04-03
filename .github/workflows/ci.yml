@@ -63,11 +63,3 @@ jobs:
 
       - name: 5. Run unit tests
         run: uv run python -m unittest discover -s tests
-        env:
-          # These are fake values for CI tests.
-          server_url: http://localhost:8080
-          realm: test
-          client_id: test
-
-          DATABASE_URL: test
-

@@ -7,9 +7,9 @@ from app.kc.models import User
 
 def keycloak_openid():
     return KeycloakOpenID(
-        server_url=config("server_url"),
-        realm_name=config("realm"),
-        client_id=config("client_id"),
+        server_url=config("server_url", default="http://localhost:8080"),
+        realm_name=config("realm", default="Firebuster"),
+        client_id=config("client_id", default="firebuster-api"),
     )
 
 
