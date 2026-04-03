@@ -12,45 +12,20 @@ from app.services.weather import weather_static
 
 
 class ServiceFactory:
-    """Factory for creating and configuring application services."""
+    def __init__(self, database_url: str, weather_config: dict):
+        self.engine: Engine = create_engine(database_url)
+        self.weather_service = WeatherService(
+            base_url=weather_config["base_url"],
+            headers=weather_config["headers"],
+            timeout=weather_config["timeout"],
+        )
 
-    def __init__(
-        self,
-        database_url: str | None = None,
-        weather_config: dict | None = None,
-    ):
-        # Set database URL from parameter or environment
-        if database_url is None:
-            database_url = config("DATABASE_URL", default="")
-
-        self.database_url = database_url
-        if not self.database_url:
-            raise ValueError(
-                "Database URL must be provided or set in DATABASE_URL environment variable"
-            )
-
-        # Create database engine
-        self.engine: Engine = create_engine(self.database_url)
-
-        # Set weather configuration
-        if weather_config is None:
-            self.weather_config = {
-                "base_url": weather_static.met_base_url,
-                "headers": weather_static.met_required_headers,
-                "timeout": 10,
-            }
-        else:
-            self.weather_config = weather_config
-
-    def create_ttf_service(self):
-        """Create a fully configured TTF service with all dependencies."""
-        with Session(self.engine) as session:
-            repo = PostgresTTFRepository(session)
-            weather_service = WeatherService(**self.weather_config)
-            yield TTFService(repo=repo, weather_service=weather_service)
+    def create_ttf_service(self, session: Session) -> TTFService:
+        """Create a TTF service — caller manages the session."""
+        repo = PostgresTTFRepository(session)
+        return TTFService(repo=repo, weather_service=self.weather_service)
 
 
-# Module-level factory instance
 factory: ServiceFactory | None = None
 
 
@@ -58,11 +33,19 @@ def get_factory() -> ServiceFactory:
     """Get or create the default factory instance."""
     global factory
     if factory is None:
-        factory = ServiceFactory()
+        factory = ServiceFactory(
+            database_url=config("DATABASE_URL"),
+            weather_config={
+                "base_url": weather_static.met_base_url,
+                "headers": weather_static.met_required_headers,
+                "timeout": 10,
+            },
+        )
     return factory
 
 
 def get_ttf_service():
-    """Get a TTF service instance (for FastAPI dependency injection)."""
+    """FastAPI dependency — yields a TTFService with a managed session."""
     factory = get_factory()
-    yield from factory.create_ttf_service()
+    with Session(factory.engine) as session:
+        yield factory.create_ttf_service(session)
