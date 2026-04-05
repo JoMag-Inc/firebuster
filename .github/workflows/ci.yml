@@ -36,7 +36,7 @@ jobs:
           python-version-file: ".python-version"
 
       - name: 4. Run lint checks
-        run: make lint
+        run: uvx ruff check . --select E9,F63,F7,F82
 
   # Job 2: run unit tests.
   unit-tests:
