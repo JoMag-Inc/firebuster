@@ -5,7 +5,7 @@ from app.models.ttf_result import TTFResult
 from sqlmodel import Session, select
 
 
-class TTFReposiotry(ABC):
+class TTFRepository(ABC):
     """Abstract base repository for TTF result persistence.
 
     Implementations should provide:
@@ -55,7 +55,7 @@ class TTFReposiotry(ABC):
         pass
 
 
-class PostgresTTFRepository(TTFReposiotry):
+class PostgresTTFRepository(TTFRepository):
     """PostgreSQL implementation of TTF repository.
 
     Attributes:
