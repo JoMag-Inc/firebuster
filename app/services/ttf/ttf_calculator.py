@@ -1,14 +1,40 @@
 import csv
-from dataclasses import dataclass
 from io import StringIO
 
 from frcm import WeatherData, WeatherDataPoint, compute
+from pydantic import BaseModel
 
 
-@dataclass(frozen=True)
-class TTFPoint:
-    weather_point: WeatherDataPoint
+class TTFPoint(BaseModel):
+    """Combined weather data and TTF calculation result for a single point in time."""
+
+    timestamp: str
+    temperature: float
+    humidity: float
+    wind_speed: float
     ttf: float
+
+    @classmethod
+    def from_weather_point(
+        cls, weather_point: WeatherDataPoint, ttf: float
+    ) -> "TTFPoint":
+        """
+        Factory method to create TTFPoint from WeatherDataPoint and TTF value.
+
+        Args:
+            weather_point: WeatherDataPoint object from frcm library
+            ttf: Calculated time to flashover in minutes
+
+        Returns:
+            TTFPoint object with flattened weather data and TTF value
+        """
+        return cls(
+            timestamp=str(weather_point.timestamp),
+            temperature=weather_point.temperature,
+            humidity=weather_point.humidity,
+            wind_speed=weather_point.wind_speed,
+            ttf=ttf,
+        )
 
 
 class TTFCalculator:
@@ -55,7 +81,9 @@ class TTFCalculator:
         ttf_results = []
         for index in range(count):
             ttf_results.append(
-                TTFPoint(weather_point=data_points[index], ttf=float(ttf_values[index]))
+                TTFPoint.from_weather_point(
+                    data_points[index], float(ttf_values[index])
+                )
             )
 
         return ttf_results

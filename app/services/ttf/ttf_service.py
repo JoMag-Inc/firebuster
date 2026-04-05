@@ -44,8 +44,7 @@ class TTFService:
                 - latitude: The requested latitude
                 - longitude: The requested longitude
                 - calculated_at: UTC timestamp of calculation
-                - ttf_minutes: List of TTF values in minutes for each time point
-                - weather_input: List of weather data used for calculations
+                - ttf_points: List of combined weather data and TTF values
         """
         cached = self.repo.get(lat, lon)
         if cached:
@@ -62,8 +61,7 @@ class TTFService:
             latitude=lat,
             longitude=lon,
             calculated_at=datetime.now(timezone.utc),
-            ttf_minutes=[p.ttf for p in ttf_points],
-            weather_input=[p.weather_point.model_dump(mode="json") for p in ttf_points],
+            ttf_points=[p.model_dump(mode="json") for p in ttf_points],
         )
 
         self.repo.save(result)

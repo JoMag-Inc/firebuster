@@ -7,5 +7,4 @@ class TTFResult(SQLModel, table=True):
     latitude: float
     longitude: float
     calculated_at: datetime
-    ttf_minutes: list = Field(sa_column=Column(JSON))
-    weather_input: list = Field(sa_column=Column(JSON))
+    ttf_points: list = Field(sa_column=Column(JSON))
