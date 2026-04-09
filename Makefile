@@ -1,5 +1,9 @@
+# Load environment variables from .env file
+include .env
+export
+
 # Declare command targets (not real files).
-.PHONY: dev prod test lint format-check ci-check
+.PHONY: dev prod test lint format-check ci-check migrate migrate-down migrate-status inspect-db inspect-kc-db
 
 # Start API in development mode with auto-reload.
 dev:
@@ -23,3 +27,24 @@ format-check:
 
 # Convenience target for local CI-style checks.
 ci-check: lint test
+
+# Apply all pending migrations
+migrate:
+	docker compose exec app uv run alembic upgrade head
+
+# Roll back the last migration.
+migrate-down:
+	docker compose exec app uv run alembic downgrade -1
+
+# Show current migration state.
+migrate-status:
+	docker compose exec app uv run alembic current
+
+# Inspect tables in the firebuster app database.
+inspect-db:
+	docker compose exec postgres psql -U ${POSTGRES_USER} -d firebuster -c "\dt"
+
+# Inspect tables in the keycloak database.
+inspect-kc-db:
+	docker compose exec postgres psql -U ${POSTGRES_USER} -d keycloak -c "\dt"
+

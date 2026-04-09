@@ -1,7 +1,6 @@
 import unittest
 
-from app.services.ttf_calculator import TTFCalculator, TTFResult
-from frcm import WeatherDataPoint
+from app.services.ttf.ttf_calculator import TTFCalculator, TTFPoint
 
 
 class TestTTFCalculator(unittest.TestCase):
@@ -34,11 +33,10 @@ class TestTTFCalculator(unittest.TestCase):
 
         self.assertIsNotNone(results)
         self.assertEqual(len(results), 2)
-        self.assertIsInstance(results[0], TTFResult)
-        self.assertIsInstance(results[0].weather_point, WeatherDataPoint)
-        self.assertEqual(results[0].weather_point.temperature, 10.5)
-        self.assertEqual(results[0].weather_point.humidity, 65)
-        self.assertEqual(results[0].weather_point.wind_speed, 5.2)
+        self.assertIsInstance(results[0], TTFPoint)
+        self.assertEqual(results[0].temperature, 10.5)
+        self.assertEqual(results[0].humidity, 65)
+        self.assertEqual(results[0].wind_speed, 5.2)
         self.assertIsInstance(results[0].ttf, float)
 
     def test_calculate_from_csv(self):
@@ -51,11 +49,11 @@ class TestTTFCalculator(unittest.TestCase):
 
         self.assertIsNotNone(results)
         self.assertGreater(len(results), 0)
-        self.assertIsInstance(results[0], TTFResult)
-        self.assertIsInstance(results[0].weather_point, WeatherDataPoint)
-        self.assertEqual(results[0].weather_point.temperature, 10.5)
-        self.assertEqual(results[0].weather_point.humidity, 65)
-        self.assertEqual(results[0].weather_point.wind_speed, 5.2)
+        self.assertIsInstance(results[0], TTFPoint)
+        # TTFPoint is now a Pydantic model with flattened fields
+        self.assertEqual(results[0].temperature, 10.5)
+        self.assertEqual(results[0].humidity, 65)
+        self.assertEqual(results[0].wind_speed, 5.2)
         self.assertIsInstance(results[0].ttf, float)
 
     def test_empty_csv(self):

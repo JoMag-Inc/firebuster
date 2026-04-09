@@ -3,13 +3,14 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: ghcr.io/jomag-inc/firebuster:v0.1.1
+    image: firebuster:local
     ports:
       - "8000:8000"
     environment:
       client_id: ${client_id:-firebuster-client}
       server_url: ${server_url}
       realm: ${realm}
+      DATABASE_URL: ${FIREBUSTER_DB_URL}
     depends_on:
       - keycloak
 
@@ -19,11 +20,11 @@ services:
       - "8080:8080"
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME}
-      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD} 
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD}
       KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://postgres:5432/${KC_DB_NAME}
-      KC_DB_USERNAME: ${KC_DB_USERNAME}
-      KC_DB_PASSWORD: ${KC_DB_PASSWORD}
+      KC_DB_URL: ${KEYCLOAK_DB_URL}
+      KC_DB_USERNAME: ${KEYCLOAK_DB_USERNAME}
+      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
       KC_HTTP_ENABLED: "true"
       KC_HOSTNAME_STRICT: "false"
     volumes:
@@ -31,7 +32,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    command: start
+    command: start --import-realm
 
   postgres:
     image: 'postgres:17'
@@ -43,11 +44,12 @@ services:
       timeout: 5s
       retries: 5
     environment:
-      POSTGRES_USER: ${KC_DB_USERNAME}
-      POSTGRES_PASSWORD: ${KC_DB_PASSWORD}
-      POSTGRES_DB: ${KC_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./database/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
 
 volumes:
     postgres_data:

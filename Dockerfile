@@ -25,6 +25,8 @@ RUN uv sync --locked --no-dev
 
 # Copy our actual application code into the container.
 COPY app ./app
+COPY database/alembic.ini ./
+COPY database/migrations ./migrations
 # Tell Docker this app listens on port 8000.
 EXPOSE 8000
 

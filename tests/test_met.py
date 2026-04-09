@@ -1,4 +1,4 @@
-"""Tests for MET weather functions.
+"""Tests for MET weather service.
 
 These tests check that we can:
 - fetch data,
@@ -19,17 +19,22 @@ import unittest
 from unittest.mock import Mock, patch
 import requests
 
-from app.services.weather.weather_get import (
-    get_weather_data_for_coordinates,
-    process_weather_data,
-)
+from app.services.weather.weather_service import WeatherService
 
 
-class TestMetClient(unittest.TestCase):
-    """Tests for downloading and processing MET weather data."""
+class TestWeatherService(unittest.TestCase):
+    """Tests for WeatherService class methods."""
 
-    @patch("app.services.weather.weather_get.requests.get")
-    def test_get_weather_data_for_coordinates_success(self, mock_get):
+    def setUp(self):
+        """Create a WeatherService instance for each test."""
+        self.weather_service = WeatherService(
+            base_url="https://api.met.no/weatherapi/locationforecast/2.0/compact",
+            headers={"User-Agent": "Firebuster/1.0 (firebuster.no)"},
+            timeout=10,
+        )
+
+    @patch("app.services.weather.weather_service.requests.get")
+    def test_fetch_weather_data_success(self, mock_get):
         """Should return JSON when the MET call is successful."""
         # Arrange
         # Fake API payload we expect back from MET.
@@ -42,8 +47,8 @@ class TestMetClient(unittest.TestCase):
         mock_get.return_value = mock_response
 
         # Act
-        # Run the function under test.
-        result = get_weather_data_for_coordinates(61.452, 5.857)
+        # Run the method under test.
+        result = self.weather_service._fetch_weather_data(61.452, 5.857)
 
         # Assert
         # Check returned JSON data.
@@ -64,8 +69,8 @@ class TestMetClient(unittest.TestCase):
         # Check that timeout value is sent.
         self.assertEqual(10, kwargs["timeout"])
 
-    @patch("app.services.weather.weather_get.requests.get")
-    def test_get_weather_data_for_coordinates_http_error_raises(self, mock_get):
+    @patch("app.services.weather.weather_service.requests.get")
+    def test_fetch_weather_data_http_error_raises(self, mock_get):
         """Should raise HTTPError when MET returns an HTTP error."""
         # Arrange
         # Fake response where raise_for_status throws HTTPError.
@@ -76,23 +81,23 @@ class TestMetClient(unittest.TestCase):
         mock_get.return_value = mock_response
 
         # Act + Assert
-        # Verify the same error type bubbles up from our function.
+        # Verify the same error type bubbles up from our method.
         with self.assertRaises(requests.HTTPError):
-            get_weather_data_for_coordinates(61.452, 5.857)
+            self.weather_service._fetch_weather_data(61.452, 5.857)
 
-    @patch("app.services.weather.weather_get.requests.get")
-    def test_get_weather_data_for_coordinates_request_failure_raises(self, mock_get):
+    @patch("app.services.weather.weather_service.requests.get")
+    def test_fetch_weather_data_request_failure_raises(self, mock_get):
         """Should raise RequestException on network/request failure."""
         # Arrange
         # Simulate a network/transport failure before a response is returned.
         mock_get.side_effect = requests.RequestException("Network error")
 
         # Act + Assert
-        # Verify our function does not hide the request exception.
+        # Verify our method does not hide the request exception.
         with self.assertRaises(requests.RequestException):
-            get_weather_data_for_coordinates(61.452, 5.857)
+            self.weather_service._fetch_weather_data(61.452, 5.857)
 
-    def test_json_to_csv(self):
+    def test_process_to_csv_with_real_data(self):
         """Should convert sample MET JSON into valid CSV output."""
         # Arrange
         with open("tests/data/json_reference.json", "r") as f:
@@ -100,7 +105,7 @@ class TestMetClient(unittest.TestCase):
 
         # Act
         # Convert JSON to CSV text.
-        csv_output = process_weather_data(json_data)
+        csv_output = self.weather_service._process_to_csv(json_data)
 
         # Assert
         # Check that output is a string.
@@ -124,7 +129,7 @@ class TestMetClient(unittest.TestCase):
         self.assertTrue(is_numeric_dtype(df["humidity"]))
         self.assertTrue(is_numeric_dtype(df["wind_speed"]))
 
-    def test_process_weather_data_malformed_payload_raises(self):
+    def test_process_to_csv_malformed_payload_raises(self):
         """Should raise ValueError if required MET fields are missing."""
         # Arrange
         # This payload is missing properties.timeseries on purpose.
@@ -133,13 +138,13 @@ class TestMetClient(unittest.TestCase):
         # Act + Assert
         # Verify we get a clear validation error.
         with self.assertRaises(ValueError) as context:
-            process_weather_data(malformed_payload)
+            self.weather_service._process_to_csv(malformed_payload)
 
         # Assert
         # Check that the message points to the missing field path.
         self.assertIn("properties.timeseries", str(context.exception))
 
-    def test_process_weather_data_empty_timeseries_returns_header_only(self):
+    def test_process_to_csv_empty_timeseries_returns_header_only(self):
         """Should return only the CSV header when timeseries is empty."""
         # Arrange
         # Valid MET shape, but with no rows.
@@ -147,8 +152,64 @@ class TestMetClient(unittest.TestCase):
 
         # Act
         # Convert to CSV.
-        csv_output = process_weather_data(payload)
+        csv_output = self.weather_service._process_to_csv(payload)
 
         # Assert
         # With no rows, only header line should be present.
         self.assertEqual("timestamp,temperature,humidity,wind_speed\r\n", csv_output)
+
+    @patch("app.services.weather.weather_service.requests.get")
+    def test_get_weather_at_location_integration(self, mock_get):
+        """Should fetch and process weather data end-to-end."""
+        # Arrange
+        # Create a minimal valid MET response.
+        api_response = {
+            "properties": {
+                "timeseries": [
+                    {
+                        "time": "2024-01-01T12:00:00Z",
+                        "data": {
+                            "instant": {
+                                "details": {
+                                    "air_temperature": 5.2,
+                                    "relative_humidity": 80.0,
+                                    "wind_speed": 3.5,
+                                }
+                            }
+                        },
+                    }
+                ]
+            }
+        }
+
+        mock_response = Mock()
+        mock_response.raise_for_status.return_value = None
+        mock_response.json.return_value = api_response
+        mock_get.return_value = mock_response
+
+        # Act
+        # Call the main public API method.
+        csv_output = self.weather_service.get_weather_at_location(61.452, 5.857)
+
+        # Assert
+        # Check that we got CSV output.
+        self.assertIsInstance(csv_output, str)
+        self.assertIn("timestamp,temperature,humidity,wind_speed", csv_output)
+        self.assertIn("2024-01-01T12:00:00Z", csv_output)
+        self.assertIn("5.2", csv_output)
+        self.assertIn("80.0", csv_output)
+        self.assertIn("3.5", csv_output)
+
+    def test_custom_initialization(self):
+        """Should allow custom configuration via constructor."""
+        # Arrange & Act
+        custom_service = WeatherService(
+            base_url="https://custom.api.com",
+            headers={"Custom-Header": "value"},
+            timeout=30,
+        )
+
+        # Assert
+        self.assertEqual("https://custom.api.com", custom_service.base_url)
+        self.assertEqual({"Custom-Header": "value"}, custom_service.headers)
+        self.assertEqual(30, custom_service.timeout)

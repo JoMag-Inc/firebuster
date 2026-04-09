@@ -22,7 +22,7 @@ jobs:
           host: ${{ secrets.FIREBUSTER_IP}}
           username: ${{secrets.FIREBUSTER_USER}}
           key: ${{secrets.FIREBUSTER_SERVER_ACCESS}}
-          source: "docker-compose.yml"
+          source: "compose.yml"
           target: "~/firebuster-compose"
 
       - name: Refresh Docker

@@ -235,3 +235,37 @@ The interactive API docs are available at `http://localhost:8000/docs` while the
 ## Keycloak
 
 Authentication to the REST API is managed using Keycloak. It runs in a Docker container backed by a PostgreSQL database for persistent storage. The Firebuster realm and client are imported automatically on first boot from `kcdb/data/import/realm-export.json`.
+
+## Persistent storage
+
+Migrations run inside the app container against the `firebuster` database. The stack must be running before you apply migrations.
+
+**Apply all pending migrations:**
+
+```bash
+make migrate
+```
+
+**Roll back the last migration:**
+
+```bash
+make migrate-down
+```
+
+**Check current migration state:**
+
+```bash
+make migrate-status
+```
+
+**Inspect tables in the firebuster database:**
+
+```bash
+make inspect-db
+```
+
+**Inspect tables in the Keycloak database:**
+
+```bash
+make inspect-kc-db
+```
