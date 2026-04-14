@@ -37,8 +37,8 @@ class TTFService:
         data_csv = self._fetch_weather_csv(lat, lon)
         result = self._build_ttf_result(lat, lon, data_csv)
 
-        self.repo.save(result)
         self._publish_fire_risk(result)
+        self.repo.save(result)
 
         return result
 
