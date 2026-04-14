@@ -3,10 +3,14 @@
 from __future__ import annotations
 
 import json
+import logging
 
 import paho.mqtt.client as mqtt
 
 from app.models.ttf_result import TTFResult
+
+
+logger = logging.getLogger(__name__)
 
 
 class MQTTService:
@@ -55,9 +59,9 @@ class MQTTService:
         finally:
             try:
                 client.loop_stop()
-            except Exception:
-                pass
+            except Exception as exc:
+                logger.debug("Ignoring MQTT loop_stop cleanup error: %s", exc, exc_info=True)
             try:
                 client.disconnect()
-            except Exception:
-                pass
+            except Exception as exc:
+                logger.debug("Ignoring MQTT disconnect cleanup error: %s", exc, exc_info=True)
