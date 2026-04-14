@@ -11,8 +11,22 @@ services:
       server_url: ${server_url}
       realm: ${realm}
       DATABASE_URL: ${FIREBUSTER_DB_URL}
+      MQTT_BROKER_HOST: ${MQTT_BROKER_HOST:-mqtt}
+      MQTT_BROKER_PORT: ${MQTT_BROKER_PORT:-1883}
+      MQTT_TOPIC: ${MQTT_TOPIC:-firebuster/fire-risk}
+      MQTT_CLIENT_ID: ${MQTT_CLIENT_ID:-firebuster-api}
+      MQTT_USERNAME: ${MQTT_USERNAME:-}
+      MQTT_PASSWORD: ${MQTT_PASSWORD:-}
     depends_on:
       - keycloak
+      - mqtt
+
+  mqtt:
+    image: eclipse-mosquitto:2
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./mqtt/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
 
   keycloak:
     image: quay.io/keycloak/keycloak:latest

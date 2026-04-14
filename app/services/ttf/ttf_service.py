@@ -24,45 +24,51 @@ class TTFService:
         weather_service: Service instance for fetching weather data
     """
 
-    def __init__(self, repo, weather_service):
+    def __init__(self, repo, weather_service, mqtt_service=None):
         self.repo = repo
         self.weather_service = weather_service
+        self.mqtt_service = mqtt_service
 
     def get(self, lat: float, lon: float) -> TTFResult:
-        """Get TTF calculation results for specific coordinates.
-
-        This method first checks for cached results in the repository. If no
-        cached data exists, it fetches fresh weather data, calculates TTF values,
-        stores the result, and returns it.
-
-        Args:
-            lat: Latitude coordinate (decimal degrees, -90 to 90)
-            lon: Longitude coordinate (decimal degrees, -180 to 180)
-
-        Returns:
-            TTFResult: Object containing TTF calculations and metadata including:
-                - latitude: The requested latitude
-                - longitude: The requested longitude
-                - calculated_at: UTC timestamp of calculation
-                - ttf_points: List of combined weather data and TTF values
-        """
-        cached = self.repo.get(lat, lon)
+        cached = self._get_cached_result(lat, lon)
         if cached:
             return cached
 
-        try:
-            data_csv = self.weather_service.get_weather_at_location(lat, lon)
-        except Exception:
-            raise HTTPException(status_code=503, detail="Failed to fetch weather data")
+        data_csv = self._fetch_weather_csv(lat, lon)
+        result = self._build_ttf_result(lat, lon, data_csv)
 
+        self.repo.save(result)
+        self._publish_fire_risk(result)
+
+        return result
+
+    def _get_cached_result(self, lat: float, lon: float) -> TTFResult | None:
+        return self.repo.get(lat, lon)
+
+    def _fetch_weather_csv(self, lat: float, lon: float) -> str:
+        try:
+            return self.weather_service.get_weather_at_location(lat, lon)
+        except Exception as exc:
+            raise HTTPException(status_code=503, detail="Failed to fetch weather data") from exc
+
+    def _build_ttf_result(self, lat: float, lon: float, data_csv: str) -> TTFResult:
         ttf_points = TTFCalculator.calculate_from_csv(data_csv)
 
-        result = TTFResult(
+        return TTFResult(
             latitude=lat,
             longitude=lon,
             calculated_at=datetime.now(timezone.utc),
             ttf_points=[p.model_dump(mode="json") for p in ttf_points],
         )
 
-        self.repo.save(result)
-        return result
+    def _publish_fire_risk(self, result: TTFResult) -> None:
+        if self.mqtt_service is None:
+            return
+
+        try:
+            self.mqtt_service.publish_fire_risk(result)
+        except Exception as exc:
+            raise HTTPException(
+                status_code=503,
+                detail="Failed to publish fire-risk message",
+            ) from exc
