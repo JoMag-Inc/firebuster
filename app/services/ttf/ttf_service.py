@@ -24,9 +24,16 @@ class TTFService:
         weather_service: Service instance for fetching weather data
     """
 
-    def __init__(self, repo, weather_service):
+    def __init__(self, repo, weather_service, messaging_service=None):
         self.repo = repo
         self.weather_service = weather_service
+        self.messaging_service = messaging_service
+
+    def _publish_fire_risk(self, result: TTFResult, source: str) -> None:
+        """Best-effort fire-risk publish to keep API responses resilient."""
+        if self.messaging_service is None:
+            return
+        self.messaging_service.publish_fire_risk(result, source=source)
 
     def get(self, lat: float, lon: float) -> TTFResult:
         """Get TTF calculation results for specific coordinates.
@@ -48,6 +55,7 @@ class TTFService:
         """
         cached = self.repo.get(lat, lon)
         if cached:
+            self._publish_fire_risk(cached, source="cache")
             return cached
 
         try:
@@ -65,4 +73,5 @@ class TTFService:
         )
 
         self.repo.save(result)
+        self._publish_fire_risk(result, source="fresh")
         return result
