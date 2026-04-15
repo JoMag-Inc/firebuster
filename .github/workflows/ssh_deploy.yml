@@ -15,5 +15,5 @@ jobs:
         with:
           host: ${{ secrets.FIREBUSTER_IP }}
           username: deploy
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          key: ${{ secrets.SSH_DEPLOY }}
           script: echo "Deploy triggered"
