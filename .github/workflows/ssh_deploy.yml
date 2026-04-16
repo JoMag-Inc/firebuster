@@ -19,6 +19,9 @@ jobs:
           key: ${{ secrets.SSH_DEPLOY }}
           script: echo "Deploy triggered"
       
+      - name: Checkout code
+        uses: actions/checkout@v6
+      
       - name: Copy file via SSH
         uses: appleboy/scp-action@v1.0.0
         with:
