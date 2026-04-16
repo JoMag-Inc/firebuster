@@ -8,7 +8,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-24.04
-
+    
+    #connection test
     steps:
       - name: SSH Deploy
         uses: appleboy/ssh-action@v1.2.5
@@ -17,3 +18,12 @@ jobs:
           username: deploy
           key: ${{ secrets.SSH_DEPLOY }}
           script: echo "Deploy triggered"
+      
+      - name: Copy file via SSH
+        uses: appleboy/scp-action@v1.0.0
+        with:
+          host: ${{ secrets.FIREBUSTER_IP}}
+          username: deploy
+          key: ${{ secrets.SSH_DEPLOY }}
+          source: "compose.prod.yml"
+          target: "~/firebuster-compose-test"
