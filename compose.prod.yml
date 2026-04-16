@@ -29,7 +29,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    command: start
+    command: start --import-realm
 
   postgres:
     image: 'postgres:17'
