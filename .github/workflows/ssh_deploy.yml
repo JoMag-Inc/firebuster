@@ -9,8 +9,9 @@ jobs:
   deploy:
     runs-on: ubuntu-24.04
     
-    #connection test
+    
     steps:
+      #connection test
       - name: SSH Deploy
         uses: appleboy/ssh-action@v1.2.5
         with:
@@ -19,6 +20,7 @@ jobs:
           key: ${{ secrets.SSH_DEPLOY }}
           script: echo "Deploy triggered"
       
+      #do the work
       - name: Checkout code
         uses: actions/checkout@v6
       
@@ -29,4 +31,12 @@ jobs:
           username: deploy
           key: ${{ secrets.SSH_DEPLOY }}
           source: "compose.prod.yml"
-          target: "~/firebuster-compose-test"
+          target: "/home/deploy/firebuster-compose-test"
+      
+      - name: Refresh Docker
+        uses: appleboy/ssh-action@v1.2.5
+        with: 
+          host: ${{ secrets.FIREBUSTER_IP }}
+          username: deploy
+          key: ${{ secrets.SSH_DEPLOY }}
+          script: /home/deploy/deploy.sh
