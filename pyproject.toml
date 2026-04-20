@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "fastapi-security>=0.1.0",
-    "fastapi[standard]>=0.128.2",
+    "fastapi[standard]>=0.136.0",
     "frcm",
     "pandas>=3.0.1",
     "requests>=2.32.0",
@@ -30,5 +30,5 @@ quote-style = "double"
 
 [dependency-groups]
 dev = [
-    "ruff>=0.15.8",
+    "ruff>=0.15.10",
 ]
