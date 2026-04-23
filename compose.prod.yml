@@ -10,6 +10,12 @@ services:
       DATABASE_URL: ${FIREBUSTER_DB_URL}
     depends_on:
       - keycloak
+      - mosquitto
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    ports:
+      - "1883:1883"
 
   keycloak:
     image: quay.io/keycloak/keycloak:latest
