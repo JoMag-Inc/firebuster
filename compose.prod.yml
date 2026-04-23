@@ -24,6 +24,8 @@ services:
       KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
       KC_HTTP_ENABLED: "true"
       KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME: auth.firebuster.no
+      KC_PROXY: edge
     volumes:
       - ./kcdb/data/import:/opt/keycloak/data/import
     depends_on:
