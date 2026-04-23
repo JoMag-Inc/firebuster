@@ -76,5 +76,5 @@ def protected_user_loc(location: str, user: bool = Depends(verify_user_path)):
 @app.get("/") 
 def read_root(): 
     return {
-        "message": "Hello Firebuster API!"
+        "message": "Hello Firebuster API! Check it out at /docs."
     }
