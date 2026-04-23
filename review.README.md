@@ -1,6 +1,8 @@
 # Firebuster Peer Review Setup
 
-This guide helps classmates run and test Firebuster locally with Docker Compose.
+## Overall architecture
+
+![architecture](./assets/architecture.png)
 
 ## Prerequisites
 
