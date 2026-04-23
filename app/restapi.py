@@ -95,3 +95,8 @@ def protected_get_ttf_user(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Unexpected server error while handling TTF request",
         )
+
+
+@app.get("/")
+def read_root():
+    return {"message": "Hello Firebuster API!"}
