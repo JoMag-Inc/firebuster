@@ -1,5 +1,5 @@
 import unittest
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from unittest.mock import Mock, patch
 
 from app.models.ttf_result import TTFResult
@@ -73,7 +73,42 @@ class TestTTFServiceMessaging(unittest.TestCase):
         result = service.get(61.45, 5.85)
 
         self.assertEqual(cached, result)
+        repo.delete.assert_not_called()
         mqtt_service.publish_fire_risk.assert_called_once_with(cached, source="cache")
+
+    @patch("app.services.ttf.ttf_service.TTFCalculator.calculate_from_csv")
+    def test_stale_cached_result_refreshes_data(self, mock_calculate):
+        stale = TTFResult(
+            latitude=61.45,
+            longitude=5.85,
+            calculated_at=datetime.now(timezone.utc) - timedelta(hours=1),
+            ttf_points=[{"ttf": 2.34}],
+        )
+
+        repo = Mock()
+        repo.get.return_value = stale
+
+        weather_service = Mock()
+        weather_service.get_weather_at_location.return_value = "csv"
+
+        mock_point = Mock()
+        mock_point.model_dump.return_value = {"ttf": 1.11}
+        mock_calculate.return_value = [mock_point]
+
+        mqtt_service = Mock()
+
+        service = TTFService(
+            repo=repo,
+            weather_service=weather_service,
+            messaging_service=mqtt_service,
+        )
+
+        result = service.get(61.45, 5.85)
+
+        repo.delete.assert_called_once_with(61.45, 5.85)
+        weather_service.get_weather_at_location.assert_called_once_with(61.45, 5.85)
+        repo.save.assert_called_once()
+        mqtt_service.publish_fire_risk.assert_called_once_with(result, source="fresh")
 
     @patch("app.services.ttf.ttf_service.TTFCalculator.calculate_from_csv")
     def test_publishes_fresh_result(self, mock_calculate):
