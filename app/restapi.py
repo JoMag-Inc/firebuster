@@ -1,7 +1,7 @@
 from app.factory import get_ttf_service
 from app.services.ttf.ttf_service import TTFService
 from decouple import config
-from fastapi import FastAPI, Depends, status, Query, HTTPException
+from fastapi import FastAPI, Depends, status, Query
 from app.kc.auth import (
     verify_admin_role,
     verify_user_role,
