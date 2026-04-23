@@ -220,6 +220,33 @@ curl -s "http://localhost:8000/api/v1/ttf/?longitude=10&latitude=60" \
 
 Returns a list of TTF (time to flashover) values in hours paired with the weather data used for each calculation.
 
+## MQTT fire risk messaging
+
+Firebuster can publish fire risk updates to MQTT whenever `GET /api/v1/ttf/` is called.
+
+By default (from `.env.example`) it publishes to:
+
+- Broker host: `mosquitto`
+- Broker port: `1883`
+- Topic: `firebuster/fire-risk`
+
+The payload is JSON and contains:
+
+- `event` (`fire_risk_update`)
+- `source` (`fresh` when calculated now, `cache` when served from DB)
+- `latitude`, `longitude`, `calculated_at`
+- `ttf_points`
+
+You can test a subscriber locally with:
+
+```bash
+docker compose up -d mosquitto
+docker run --rm -it --network host eclipse-mosquitto:2 \
+  mosquitto_sub -h 127.0.0.1 -p 1883 -t firebuster/fire-risk -v
+```
+
+Then call the API endpoint and you should see a published message on the topic.
+
 **Protected endpoints:**
 
 | Endpoint                        | Required role |
