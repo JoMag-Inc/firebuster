@@ -6,7 +6,8 @@ TTF calculator, and repository to provide cached and fresh TTF calculations.
 """
 
 from datetime import datetime, timezone
-from fastapi import HTTPException
+
+import requests
 
 from app.models.ttf_result import TTFResult
 from app.services.ttf.ttf_calculator import TTFCalculator
@@ -53,17 +54,28 @@ class TTFService:
                 - calculated_at: UTC timestamp of calculation
                 - ttf_points: List of combined weather data and TTF values
         """
-        cached = self.repo.get(lat, lon)
+        try:
+            cached = self.repo.get(lat, lon)
+        except Exception as e:
+            raise RuntimeError("Failed to read cached TTF result") from e
+
         if cached:
             self._publish_fire_risk(cached, source="cache")
             return cached
 
         try:
             data_csv = self.weather_service.get_weather_at_location(lat, lon)
-        except Exception:
-            raise HTTPException(status_code=503, detail="Failed to fetch weather data")
+        except requests.RequestException as e:
+            raise ConnectionError("Weather provider is unavailable") from e
+        except ValueError as e:
+            raise ValueError("Weather provider returned invalid data") from e
 
-        ttf_points = TTFCalculator.calculate_from_csv(data_csv)
+        try:
+            ttf_points = TTFCalculator.calculate_from_csv(data_csv)
+        except ValueError as e:
+            raise ValueError("Could not calculate TTF from weather data") from e
+        except Exception as e:
+            raise RuntimeError("Failed to calculate TTF") from e
 
         result = TTFResult(
             latitude=lat,
@@ -72,6 +84,10 @@ class TTFService:
             ttf_points=[p.model_dump(mode="json") for p in ttf_points],
         )
 
-        self.repo.save(result)
+        try:
+            self.repo.save(result)
+        except Exception as e:
+            raise RuntimeError("Failed to store TTF result") from e
+
         self._publish_fire_risk(result, source="fresh")
         return result
