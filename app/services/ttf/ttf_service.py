@@ -36,6 +36,19 @@ class TTFService:
             return
         self.messaging_service.publish_fire_risk(result, source=source)
 
+    @staticmethod
+    def _is_from_current_hour(timestamp: datetime) -> bool:
+        if timestamp.tzinfo is None:
+            cached_utc = timestamp.replace(tzinfo=timezone.utc)
+        else:
+            cached_utc = timestamp.astimezone(timezone.utc)
+
+        current_utc = datetime.now(timezone.utc)
+
+        cached_hour = cached_utc.replace(minute=0, second=0, microsecond=0)
+        current_hour = current_utc.replace(minute=0, second=0, microsecond=0)
+        return cached_hour == current_hour
+
     def get(self, lat: float, lon: float) -> TTFResult:
         """Get TTF calculation results for specific coordinates.
 
@@ -60,8 +73,14 @@ class TTFService:
             raise RuntimeError("Failed to read cached TTF result") from e
 
         if cached:
-            self._publish_fire_risk(cached, source="cache")
-            return cached
+            if self._is_from_current_hour(cached.calculated_at):
+                self._publish_fire_risk(cached, source="cache")
+                return cached
+
+            try:
+                self.repo.delete(lat, lon)
+            except Exception as e:
+                raise RuntimeError("Failed to delete stale cached TTF result") from e
 
         try:
             data_csv = self.weather_service.get_weather_at_location(lat, lon)
@@ -70,12 +89,8 @@ class TTFService:
         except ValueError as e:
             raise ValueError("Weather provider returned invalid data") from e
 
-        try:
-            ttf_points = TTFCalculator.calculate_from_csv(data_csv)
-        except ValueError as e:
-            raise ValueError("Could not calculate TTF from weather data") from e
-        except Exception as e:
-            raise RuntimeError("Failed to calculate TTF") from e
+        # calculate ttf points using frcm module
+        ttf_points = TTFCalculator.calculate_from_csv(data_csv)
 
         result = TTFResult(
             latitude=lat,
