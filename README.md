@@ -249,13 +249,10 @@ Then call the API endpoint and you should see a published message on the topic.
 
 **Protected endpoints:**
 
-| Endpoint                        | Required role |
-| ------------------------------- | ------------- |
-| `GET /api/v1/protected`         | `USER`        |
-| `GET /api/v1/protected/service` | `APP_USER`    |
-| `GET /api/v1/admin`             | `ADMIN`       |
-| `GET /api/v1/admin/service`     | `APP_ADMIN`   |
-| `GET /api/v1/ttf/`              | `USER`        |
+| Endpoint             | Required role |
+| -------------------- | ------------- |
+| `GET /api/health`    | `--`          |
+| `GET /api/v1/ttf/`   | `ADMIN`       |
 
 The interactive API docs are available at `http://localhost:8000/docs` while the server is running.
 
