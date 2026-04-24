@@ -1,6 +1,15 @@
 # Firebuster Peer Review Setup
 
 ## Overall architecture
+For the architecture we went for a three layer arcitectures with handling of requests happen in `restapi.py` through fastapi handlers. We only implemented one handler for
+Time to flashover `/api/v1/ttf`. This takes latitude and longitude paramaters for fetching weather data and calculating ttf. For business logic we use a service layer.
+This includes services for retrieving weather data from MET. A MQTT service for publishing to broker, and a TTFSevice that has the sole responsibility of returning TTF data based on longitude and latitude.
+For this it has a toolset consisting of the other services and a database. The database is accessed through the third layer. The Reposirory layer. This abstracts saving, getting and deleting entries from the database.
+
+For authentication we have set up a key cloak instance on the service. To get wether data one first have to retrieve a token for api access. Currently it only has access for a couple minutes at the time for testing.
+
+The system is orchastraded using docker compose, both for local development and on the server. This make deploying simple, but has limitations related to scalability of course.
+
 
 ![architecture](./assets/architecture.png)
 
