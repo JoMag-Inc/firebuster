@@ -11,9 +11,6 @@
 - `curl`
 - `jq`
 
-> [!IMPORTANT]
-> These commands are written for macOS/Linux. Windows users may need equivalent commands.
-
 ### Extra notes for Windows
 #### some dependencies must be installed explicitly
 - Open PowerShell as admin
