@@ -185,11 +185,13 @@ The payload is JSON and contains:
 You can test a subscriber locally with:
 
 ```bash
+#MacOS/Linux
 docker run --rm -it --network host eclipse-mosquitto:2 \
   mosquitto_sub -h 127.0.0.1 -p 1883 -t firebuster/fire-risk -v
 ```
 
 ```powershell
+#Windows
 docker run --rm -it --network host eclipse-mosquitto:2 `
   mosquitto_sub -h 127.0.0.1 -p 1883 -t firebuster/fire-risk -v
 ```
