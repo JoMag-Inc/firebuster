@@ -14,6 +14,25 @@
 > [!IMPORTANT]
 > These commands are written for macOS/Linux. Windows users may need equivalent commands.
 
+### Extra notes for Windows
+#### some dependencies must be installed explicitly
+- Open PowerShell as admin
+- Install Chocolatey [(Install guide)](https://chocolatey.org/install)
+- Install `make` and `jq`
+
+```
+winget install jqlang.jq
+```
+
+```
+choco install make
+```
+
+#### other notes
+- Docker desktop must be launched separately before docker commands can be used in PowerShell.
+
+
+
 ## Setup
 
 The stack runs four services:
@@ -93,11 +112,27 @@ Test user in the current realm export:
 Get an access token:
 
 ```bash
+#MacOS/Linux
 token=$(curl -s -X POST "http://localhost:8080/realms/Firebuster/protocol/openid-connect/token" \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -d "client_id=firebuster-api&username=tester&password=secrettest&grant_type=password" \
   | jq -r '.access_token')
 ```
+
+```powershell
+#Windows
+$token = (curl.exe -s -X POST "http://localhost:8080/realms/Firebuster/protocol/openid-connect/token" `
+  -H "Content-Type: application/x-www-form-urlencoded" `
+  -d "client_id=firebuster-api&username=tester&password=secrettest&grant_type=password" `
+  | ConvertFrom-Json).access_token
+```
+
+```powershell
+#verify token (Windows)
+Write-Host "Token: $token"
+```
+
+
 
 Quick checks:
 
@@ -109,6 +144,15 @@ curl http://localhost:8000/api/health
 curl -s "http://localhost:8000/api/v1/ttf/?longitude=50&latitude=50" \
   -H "Authorization: Bearer $token" | jq
 ```
+
+```powershell
+#Windows
+curl.exe http://localhost:8000/api/health
+
+curl.exe -s "http://localhost:8000/api/v1/ttf/?longitude=50&latitude=50" `
+  -H "Authorization: Bearer $token" | jq
+```
+
 
 ## OpenAPI Docs
 
@@ -142,6 +186,11 @@ You can test a subscriber locally with:
 
 ```bash
 docker run --rm -it --network host eclipse-mosquitto:2 \
+  mosquitto_sub -h 127.0.0.1 -p 1883 -t firebuster/fire-risk -v
+```
+
+```powershell
+docker run --rm -it --network host eclipse-mosquitto:2 `
   mosquitto_sub -h 127.0.0.1 -p 1883 -t firebuster/fire-risk -v
 ```
 
