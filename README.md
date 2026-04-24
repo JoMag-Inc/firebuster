@@ -4,223 +4,178 @@
 [![Python](https://img.shields.io/badge/python-3.13+-3776ab?logo=python&logoColor=white)](https://www.python.org/)
 [![Docker Image](https://img.shields.io/badge/ghcr.io-firebuster-0db7ed?logo=docker&logoColor=white)](https://ghcr.io/jomag-inc/firebuster)
 
-# firebuster
+# Firebuster Peer Review Setup
 
-Firebuster is a REST API service that can calculate the TTF (time to flashover) for a given location.
-It is currently under construction.
+## Overall architecture
 
-## Install requirements
+For the architecture we went for a three layer arcitectures with handling of requests happen in `restapi.py` through fastapi handlers. We only implemented one handler for
+Time to flashover `/api/v1/ttf`. This takes latitude and longitude paramaters for fetching weather data and calculating ttf. For business logic we use a service layer.
+This includes services for retrieving weather data from MET. A MQTT service for publishing to broker, and a TTFSevice that has the sole responsibility of returning TTF data based on longitude and latitude.
+For this it has a toolset consisting of the other services and a database. The database is accessed through the third layer. The Reposirory layer. This abstracts saving, getting and deleting entries from the database.
 
-This project uses the [UV package](https://docs.astral.sh/uv/) and project manager.
+For authentication we have set up a key cloak instance on the service. To get wether data one first have to retrieve a token for api access. Currently it only has access for a couple minutes at the time for testing.
 
-If you do not already have it:
+The system is orchastraded using docker compose, both for local development and on the server. This make deploying simple, but has limitations related to scalability of course.
 
-Install macOS/Linux:
+![architecture](./assets/architecture.png)
 
-```bash
-curl -LsSf https://astral.sh/uv/install.sh | sh
+## Prerequisites
+
+- Docker
+- Docker Compose
+- `curl`
+- `jq`
+
+### Extra notes for Windows
+
+#### some dependencies must be installed explicitly
+
+- Open PowerShell as admin
+- Install Chocolatey [(Install guide)](https://chocolatey.org/install)
+- Install `make` and `jq`
 
 ```
-
-Windows:
-
-```bash
-powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+winget install jqlang.jq
 ```
 
-Package managers:
-
-```bash
-pipx install uv
-
-brew install uv
-
-# see installation docs for more
+```
+choco install make
 ```
 
-When you have uv installed run:
+#### other notes
+
+- Docker desktop must be launched separately before docker commands can be used in PowerShell.
+
+## Setup
+
+The stack runs four services:
+
+- Firebuster API
+- Keycloak
+- PostgreSQL
+- Mosquitto (MQTT broker)
+
+Clone the repository:
 
 ```bash
-# Install dependencies from pyproject.toml
-uv sync
+git clone https://github.com/JoMag-Inc/firebuster.git
+cd firebuster
 ```
 
-To add a new package run
+Create `.env` from the example:
 
 ```bash
-uv add <package-name>
-```
-
-To update all dependencies:
-
-```bash
-uv lock --upgrade
-```
-
-## Running code
-
-To run the scripts do:
-
-```bash
-uv run python scriptname.py
-```
-
-## Tests
-
-The tests are located in `tests/`. To run the tests one can use the `make test` command like this:
-
-```bash
-make test
-```
-
-It contains a command for locating all tests in the tests/ directory and runs them
-
-In some tests we use `Mock` and `patch` to fake external API calls.
-This makes tests faster, more stable, and independent of internet/API uptime.
-
-## MET integration scope
-
-Current MET scope in this branch:
-
-- Fetch weather data from MET using explicit coordinates (`lat`, `lon`).
-- Transform MET payload to CSV with columns needed by the TTF calculator:
-  `timestamp`, `temperature`, `humidity`, `wind_speed`.
-
-Not included in this branch:
-
-- Converting user location text (for example "Førde in Norway") to coordinates.
-- UI input forms and frontend integration.
-- End-to-end API endpoint that chains location -> MET -> TTF.
-
-## FAST API
-
-Firebuster uses FastAPI for creating its endpoints. Here are some run instructions to get the server up and going
-
-The entry of the application is placed in `app/main.py` and can be run with the following commands
-
-```bash
-
-# To run in dev mode with auto-reload
-uv run fastapi dev app/main.py
-
-# While run mode is used for prod environments
-uv run fastapi run app/main.py
-```
-
-To spare your fingers we have set up a Makefile for running them with:
-
-```bash
-make dev
-
-make prod
-```
-
-While the server is running it can be tested using your favorite tools. Here is a curl command to get started:
-
-```bash
-curl http://127.0.0.1:8000/api/health
-```
-
-You can also use the built in `/docs` route in FastAPI:
-
-```bash
-http://127.0.0.1:8000/docs
-```
-
-## Docker
-
-The app can be built into a Docker image and started from Compose. The stack runs three services: the Firebuster API, Keycloak, and a PostgreSQL database.
-
-**First time setup:**
-
-```bash
-# Copy and fill in the environment file
 cp .env.example .env
 ```
 
-Edit `.env` with your values — see `.env.example` for the required fields.
-
-**Start the stack:**
+Start the stack:
 
 ```bash
-# Build and start in the foreground
+# Foreground
 docker compose up --build
 
-# Or start in the background
+# Background
 docker compose up --build -d
 ```
 
-**Stop the stack:**
+Stop the stack:
 
 ```bash
-# Stop containers — database data is preserved
+# Keep database data
 docker compose down
 
-# Stop containers AND delete the database volume (destructive — all data lost)
+# Remove containers and volumes (destructive)
 docker compose down -v
 ```
 
-> **Warning:** `docker compose down -v` permanently deletes the PostgreSQL volume. Only use this if you want to reset the database to a clean state (e.g. during development). Never run this on a production server unless you intend to wipe all Keycloak data.
+## Keycloak Import Note (Important)
 
-**Services and ports:**
+The realm import file is `kcdb/data/import/realm-export.json`.
 
-| Service        | URL                     |
-| -------------- | ----------------------- |
-| Firebuster API | `http://localhost:8000` |
-| Keycloak       | `http://localhost:8080` |
-| PostgreSQL     | `localhost:5432`        |
+Keycloak imports this file on startup when the Keycloak database is empty. If you already have data in your local volumes, old users/realm data can remain.
 
-## CD: Publish Docker image to GHCR
-
-This repository now includes a release workflow in `.github/workflows/docker-publish.yml`.
-
-What it does:
-
-- Builds the Docker image from `Dockerfile`.
-- Pushes image to GitHub Container Registry (GHCR):
-  `ghcr.io/<owner>/<repo>`
-- Runs automatically when you push a version tag like `v0.1.0`.
-
-Create and push a release tag:
+If you need to force a clean re-import (for example, to include the latest `tester` user), run:
 
 ```bash
-git tag v0.1.0
-git push origin v0.1.0
+docker compose down -v
+docker compose up --build -d
 ```
 
-After the workflow finishes, pull the image with:
+## Test the API
+
+Before testing the API we need to add the tables to the new database.
+This is done through a migration script with `alembic`.
+
+# !IMPORTANT RUN MIGRATION
+
+To do the up migration to the latest version of the database run:
 
 ```bash
-docker pull ghcr.io/<owner>/<repo>:v0.1.0
+make migrate
 ```
 
-## Usage
+this is a command we have added in Makefile, which also contains a lot of other handy commands to check the application
 
-All protected endpoints require a Bearer token from Keycloak. Obtain one first:
+Test user in the current realm export:
+
+| Username | Password   | Roles |
+| -------- | ---------- | ----- |
+| tester   | secrettest | ADMIN |
+
+Get an access token:
 
 ```bash
+#MacOS/Linux
 token=$(curl -s -X POST "http://localhost:8080/realms/Firebuster/protocol/openid-connect/token" \
   -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "client_id=firebuster-api&username=<user>&password=<password>&grant_type=password" \
+  -d "client_id=firebuster-api&username=tester&password=secrettest&grant_type=password" \
   | jq -r '.access_token')
 ```
 
-**Health check (no auth required):**
-
-```bash
-curl http://localhost:8000/api/health
+```powershell
+#Windows
+$token = (curl.exe -s -X POST "http://localhost:8080/realms/Firebuster/protocol/openid-connect/token" `
+  -H "Content-Type: application/x-www-form-urlencoded" `
+  -d "client_id=firebuster-api&username=tester&password=secrettest&grant_type=password" `
+  | ConvertFrom-Json).access_token
 ```
 
-**TTF calculation:**
+```powershell
+#verify token (Windows)
+Write-Host "Token: $token"
+```
+
+Quick checks:
 
 ```bash
-curl -s "http://localhost:8000/api/v1/ttf/?longitude=10&latitude=60" \
+# Public health endpoint (no auth)
+curl http://localhost:8000/api/health
+
+# Protected TTF endpoint (requires ADMIN role)
+curl -s "http://localhost:8000/api/v1/ttf/?longitude=50&latitude=50" \
   -H "Authorization: Bearer $token" | jq
 ```
 
-Returns a list of TTF (time to flashover) values in hours paired with the weather data used for each calculation.
+```powershell
+#Windows
+curl.exe http://localhost:8000/api/health
 
-## MQTT fire risk messaging
+curl.exe -s "http://localhost:8000/api/v1/ttf/?longitude=50&latitude=50" `
+  -H "Authorization: Bearer $token" | jq
+```
+
+## OpenAPI Docs
+
+With the stack running, open:
+
+```text
+http://localhost:8000/docs
+```
+
+Use the token from above in the Authorize dialog, then run the protected endpoints from the UI.
+It can be viewed in the terminal by typing `$token`
+
+## MQTT
 
 Firebuster can publish fire risk updates to MQTT whenever `GET /api/v1/ttf/` is called.
 
@@ -240,56 +195,59 @@ The payload is JSON and contains:
 You can test a subscriber locally with:
 
 ```bash
-docker compose up -d mosquitto
+#MacOS/Linux
 docker run --rm -it --network host eclipse-mosquitto:2 \
   mosquitto_sub -h 127.0.0.1 -p 1883 -t firebuster/fire-risk -v
 ```
 
+```powershell
+#Windows
+docker run --rm -it --network host eclipse-mosquitto:2 `
+  mosquitto_sub -h 127.0.0.1 -p 1883 -t firebuster/fire-risk -v
+```
+
 Then call the API endpoint and you should see a published message on the topic.
-
-**Protected endpoints:**
-
-| Endpoint             | Required role |
-| -------------------- | ------------- |
-| `GET /api/health`    | `--`          |
-| `GET /api/v1/ttf/`   | `ADMIN`       |
-
-The interactive API docs are available at `http://localhost:8000/docs` while the server is running.
-
-## Keycloak
-
-Authentication to the REST API is managed using Keycloak. It runs in a Docker container backed by a PostgreSQL database for persistent storage. The Firebuster realm and client are imported automatically on first boot from `kcdb/data/import/realm-export.json`.
-
-## Persistent storage
-
-Migrations run inside the app container against the `firebuster` database. The stack must be running before you apply migrations.
-
-**Apply all pending migrations:**
+Here are the commands again in just in case:
 
 ```bash
-make migrate
+#MacOS/Linux
+token=$(curl -s -X POST "http://localhost:8080/realms/Firebuster/protocol/openid-connect/token" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "client_id=firebuster-api&username=tester&password=secrettest&grant_type=password" \
+  | jq -r '.access_token')
 ```
 
-**Roll back the last migration:**
-
-```bash
-make migrate-down
+```powershell
+#Windows
+$token = (curl.exe -s -X POST "http://localhost:8080/realms/Firebuster/protocol/openid-connect/token" `
+  -H "Content-Type: application/x-www-form-urlencoded" `
+  -d "client_id=firebuster-api&username=tester&password=secrettest&grant_type=password" `
+  | ConvertFrom-Json).access_token
 ```
 
-**Check current migration state:**
-
-```bash
-make migrate-status
+```powershell
+#verify token (Windows)
+Write-Host "Token: $token"
 ```
 
-**Inspect tables in the firebuster database:**
-
 ```bash
-make inspect-db
+# Protected TTF endpoint (requires ADMIN role)
+curl -s "http://localhost:8000/api/v1/ttf/?longitude=50&latitude=50" \
+  -H "Authorization: Bearer $token" | jq
 ```
 
-**Inspect tables in the Keycloak database:**
+```powershell
+#Windows
+curl.exe http://localhost:8000/api/health
 
-```bash
+curl.exe -s "http://localhost:8000/api/v1/ttf/?longitude=50&latitude=50" `
+  -H "Authorization: Bearer $token" | jq
+```
+
+## Test with Client
+
+We have also made a client [firebuster-explorer](https://github.com/JoMag-Inc/firebuster-explorer)
+Clone and try it if you want to!
+
 make inspect-kc-db
 ```
