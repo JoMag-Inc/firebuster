@@ -1,6 +1,7 @@
 # Firebuster Peer Review Setup
 
 ## Overall architecture
+
 For the architecture we went for a three layer arcitectures with handling of requests happen in `restapi.py` through fastapi handlers. We only implemented one handler for
 Time to flashover `/api/v1/ttf`. This takes latitude and longitude paramaters for fetching weather data and calculating ttf. For business logic we use a service layer.
 This includes services for retrieving weather data from MET. A MQTT service for publishing to broker, and a TTFSevice that has the sole responsibility of returning TTF data based on longitude and latitude.
@@ -9,7 +10,6 @@ For this it has a toolset consisting of the other services and a database. The d
 For authentication we have set up a key cloak instance on the service. To get wether data one first have to retrieve a token for api access. Currently it only has access for a couple minutes at the time for testing.
 
 The system is orchastraded using docker compose, both for local development and on the server. This make deploying simple, but has limitations related to scalability of course.
-
 
 ![architecture](./assets/architecture.png)
 
@@ -21,7 +21,9 @@ The system is orchastraded using docker compose, both for local development and 
 - `jq`
 
 ### Extra notes for Windows
+
 #### some dependencies must be installed explicitly
+
 - Open PowerShell as admin
 - Install Chocolatey [(Install guide)](https://chocolatey.org/install)
 - Install `make` and `jq`
@@ -35,9 +37,8 @@ choco install make
 ```
 
 #### other notes
+
 - Docker desktop must be launched separately before docker commands can be used in PowerShell.
-
-
 
 ## Setup
 
@@ -138,8 +139,6 @@ $token = (curl.exe -s -X POST "http://localhost:8080/realms/Firebuster/protocol/
 Write-Host "Token: $token"
 ```
 
-
-
 Quick checks:
 
 ```bash
@@ -158,7 +157,6 @@ curl.exe http://localhost:8000/api/health
 curl.exe -s "http://localhost:8000/api/v1/ttf/?longitude=50&latitude=50" `
   -H "Authorization: Bearer $token" | jq
 ```
-
 
 ## OpenAPI Docs
 
@@ -203,6 +201,42 @@ docker run --rm -it --network host eclipse-mosquitto:2 `
 ```
 
 Then call the API endpoint and you should see a published message on the topic.
+Here are the commands again in just in case:
+
+```bash
+#MacOS/Linux
+token=$(curl -s -X POST "http://localhost:8080/realms/Firebuster/protocol/openid-connect/token" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "client_id=firebuster-api&username=tester&password=secrettest&grant_type=password" \
+  | jq -r '.access_token')
+```
+
+```powershell
+#Windows
+$token = (curl.exe -s -X POST "http://localhost:8080/realms/Firebuster/protocol/openid-connect/token" `
+  -H "Content-Type: application/x-www-form-urlencoded" `
+  -d "client_id=firebuster-api&username=tester&password=secrettest&grant_type=password" `
+  | ConvertFrom-Json).access_token
+```
+
+```powershell
+#verify token (Windows)
+Write-Host "Token: $token"
+```
+
+```bash
+# Protected TTF endpoint (requires ADMIN role)
+curl -s "http://localhost:8000/api/v1/ttf/?longitude=50&latitude=50" \
+  -H "Authorization: Bearer $token" | jq
+```
+
+```powershell
+#Windows
+curl.exe http://localhost:8000/api/health
+
+curl.exe -s "http://localhost:8000/api/v1/ttf/?longitude=50&latitude=50" `
+  -H "Authorization: Bearer $token" | jq
+```
 
 ## Test with Client
 
