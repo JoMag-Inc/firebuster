@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from app.models.ttf_result import TTFResult
-from sqlmodel import Session, select
+from sqlmodel import Session, select, delete
 
 
 class TTFRepository(ABC):
@@ -47,12 +47,17 @@ class TTFRepository(ABC):
 
         Raises:
             Implementation-specific exceptions for storage failures
-
-        Note:
-            Implementations should handle duplicate coordinates according to their
-            business logic (e.g., update existing, create new version, etc.)
         """
-        pass
+
+    @abstractmethod
+    def delete(self, lat: float, lon: float) -> int:
+        """Delete a TTF calculation result
+
+        Args:
+            lat: Latitude`
+
+            lon: Longitude
+        """
 
 
 class PostgresTTFRepository(TTFRepository):
@@ -73,18 +78,6 @@ class PostgresTTFRepository(TTFRepository):
         self.session = session
 
     def get(self, lat: float, lon: float) -> TTFResult | None:
-        """Retrieve a TTF result from PostgreSQL by coordinates.
-
-        Queries the database for a TTF result matching the exact latitude and
-        longitude values. Returns the first matching result if found.
-
-        Args:
-            lat: Latitude coordinate (decimal degrees, must match exactly)
-            lon: Longitude coordinate (decimal degrees, must match exactly)
-
-        Returns:
-            TTFResult: First matching result from database, or None if no match found
-        """
         result = self.session.exec(
             select(TTFResult).where(
                 TTFResult.latitude == lat, TTFResult.longitude == lon
@@ -93,14 +86,15 @@ class PostgresTTFRepository(TTFRepository):
         return result.first()
 
     def save(self, result: TTFResult) -> None:
-        """Save a TTF result to PostgreSQL.
-
-        Adds the result to the session, commits the transaction, and refreshes
-        the instance with any database-generated values (e.g., ID, timestamps).
-
-        Args:
-            result: TTFResult instance to persist
-        """
         self.session.add(result)
         self.session.commit()
         self.session.refresh(result)
+
+    def delete(self, lat: float, lon: float) -> int:
+        stmt = delete(TTFResult).where(
+            TTFResult.latitude == lat,
+            TTFResult.longitude == lon,
+        )
+        result = self.session.exec(stmt)
+        self.session.commit()
+        return result.rowcount or 0
