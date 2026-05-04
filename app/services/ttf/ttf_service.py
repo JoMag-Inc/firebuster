@@ -6,7 +6,8 @@ TTF calculator, and repository to provide cached and fresh TTF calculations.
 """
 
 from datetime import datetime, timezone
-from fastapi import HTTPException
+
+import requests
 
 from app.models.ttf_result import TTFResult
 from app.services.ttf.ttf_calculator import TTFCalculator
@@ -35,6 +36,19 @@ class TTFService:
             return
         self.messaging_service.publish_fire_risk(result, source=source)
 
+    @staticmethod
+    def _is_from_current_hour(timestamp: datetime) -> bool:
+        if timestamp.tzinfo is None:
+            cached_utc = timestamp.replace(tzinfo=timezone.utc)
+        else:
+            cached_utc = timestamp.astimezone(timezone.utc)
+
+        current_utc = datetime.now(timezone.utc)
+
+        cached_hour = cached_utc.replace(minute=0, second=0, microsecond=0)
+        current_hour = current_utc.replace(minute=0, second=0, microsecond=0)
+        return cached_hour == current_hour
+
     def get(self, lat: float, lon: float) -> TTFResult:
         """Get TTF calculation results for specific coordinates.
 
@@ -53,16 +67,29 @@ class TTFService:
                 - calculated_at: UTC timestamp of calculation
                 - ttf_points: List of combined weather data and TTF values
         """
-        cached = self.repo.get(lat, lon)
+        try:
+            cached = self.repo.get(lat, lon)
+        except Exception as e:
+            raise RuntimeError("Failed to read cached TTF result") from e
+
         if cached:
-            self._publish_fire_risk(cached, source="cache")
-            return cached
+            if self._is_from_current_hour(cached.calculated_at):
+                self._publish_fire_risk(cached, source="cache")
+                return cached
+
+            try:
+                self.repo.delete(lat, lon)
+            except Exception as e:
+                raise RuntimeError("Failed to delete stale cached TTF result") from e
 
         try:
             data_csv = self.weather_service.get_weather_at_location(lat, lon)
-        except Exception:
-            raise HTTPException(status_code=503, detail="Failed to fetch weather data")
+        except requests.RequestException as e:
+            raise ConnectionError("Weather provider is unavailable") from e
+        except ValueError as e:
+            raise ValueError("Weather provider returned invalid data") from e
 
+        # calculate ttf points using frcm module
         ttf_points = TTFCalculator.calculate_from_csv(data_csv)
 
         result = TTFResult(
@@ -72,6 +99,10 @@ class TTFService:
             ttf_points=[p.model_dump(mode="json") for p in ttf_points],
         )
 
-        self.repo.save(result)
+        try:
+            self.repo.save(result)
+        except Exception as e:
+            raise RuntimeError("Failed to store TTF result") from e
+
         self._publish_fire_risk(result, source="fresh")
         return result

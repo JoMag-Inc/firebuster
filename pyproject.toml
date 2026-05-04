@@ -16,7 +16,7 @@ dependencies = [
     "uvicorn>=0.46.0",
     "sqlalchemy>=2.0.48",
     "alembic>=1.18.4",
-    "psycopg2-binary>=2.9.11",
+    "psycopg2-binary>=2.9.12",
     "sqlmodel>=0.0.37",
 ]
 
