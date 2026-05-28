@@ -8,7 +8,7 @@ dependencies = [
     "fastapi-security>=0.1.0",
     "fastapi[standard]>=0.136.1",
     "frcm",
-    "pandas>=3.0.1",
+    "pandas>=3.0.3",
     "paho-mqtt>=2.1.0",
     "requests>=2.34.2",
     "python-decouple>=3.8",
