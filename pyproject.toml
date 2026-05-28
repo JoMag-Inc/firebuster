@@ -10,7 +10,7 @@ dependencies = [
     "frcm",
     "pandas>=3.0.1",
     "paho-mqtt>=2.1.0",
-    "requests>=2.32.0",
+    "requests>=2.34.2",
     "python-decouple>=3.8",
     "python-keycloak>=7.1.1",
     "uvicorn>=0.46.0",
