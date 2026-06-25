@@ -22,7 +22,7 @@ jobs:
       
       #do the work
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       
       - name: Copy file via SSH
         uses: appleboy/scp-action@v1.0.0
