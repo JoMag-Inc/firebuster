@@ -31,7 +31,7 @@ jobs:
           enable-cache: true
 
       - name: 3. Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version-file: ".python-version"
 
@@ -54,7 +54,7 @@ jobs:
           enable-cache: true
 
       - name: 3. Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version-file: ".python-version"
 
